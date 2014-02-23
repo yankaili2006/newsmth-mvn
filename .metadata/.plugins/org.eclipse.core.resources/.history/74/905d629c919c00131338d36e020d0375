@@ -1,0 +1,73 @@
+package com.newsmths.ide.task;
+
+import java.util.ArrayList;
+import java.util.TimerTask;
+
+import org.apache.log4j.Logger;
+
+import com.newsmths.bean.HitBean;
+import com.newsmths.bean.NoticeBean;
+import com.newsmths.bean.TopicBean;
+import com.newsmths.bean.UserBean;
+import com.newsmths.bean.UserLabelBean;
+import com.newsmths.ide.Mailer;
+import com.newsmths.lucene.Search;
+import com.newsmths.tfidf.TFIDFUtil;
+import com.newsmths.util.DBUtil;
+import com.newsmths.util.PropHelper;
+import com.newsmths.view.PageViewRender;
+
+public class MailTask extends TimerTask {
+
+	private static boolean isRunning = false;
+	private static Logger log = Logger.getLogger(MailTask.class);
+
+	public void run() {
+
+		PropHelper.getInstance();
+		DBUtil util = new DBUtil();
+
+		if (!isRunning) {
+			isRunning = true;
+			log.info("开始执行发邮件任务...");
+
+			ArrayList<UserBean> ulist = util.getUser();
+			for (int i = 0; i < ulist.size(); i++) {
+				UserBean uBean = ulist.get(i);
+				String email = uBean.getEmail();
+
+				ArrayList<UserLabelBean> labelList = util
+						.getUserLabelList(email);
+
+				// 用每个标签执行search
+				for (int j = 0; j < labelList.size(); j++) {
+					UserLabelBean bean = labelList.get(j);
+
+					int PAGE_SIZE = 20;
+					Search search = new Search();
+					ArrayList<HitBean> hitList = search.search(bean.getLabel(),
+							1, PAGE_SIZE);
+
+					// 搜索结果添加到通知表中
+					for (int k = 0; k < hitList.size(); k++) {
+						HitBean hBean = hitList.get(k);
+						TopicBean tBean = new TopicBean();
+						tBean.setGid(Integer.valueOf(hBean.getHit().getId()));
+						tBean.setTitle(hBean.getHit().getFileName());
+						util.addNotice(tBean, email);
+					}
+				}
+
+				// 发送邮件通知
+				Mailer dispatcher = new Mailer();
+				dispatcher.mail(email);
+
+			}
+			log.info("执行发邮件任务完成..."); // 任务完成
+
+			isRunning = false;
+		} else {
+			log.info("上一次任务执行还未结束..."); // 上一次任务执行还未结束
+		}
+	}
+}

@@ -1,0 +1,247 @@
+package com.newsmths.tfidf;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeSet;
+
+import org.apache.log4j.Logger;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.newsmths.bdb.BDBHelper;
+import com.newsmths.bean.HitBean;
+import com.newsmths.bean.NoticeBean;
+import com.newsmths.bean.TagBean;
+import com.newsmths.lucene.SearchHit;
+import com.newsmths.util.DBUtil;
+import com.newsmths.util.PropHelper;
+import com.newsmths.util.W2vUtil;
+
+public class TagSearch {
+	private static Logger log = Logger.getLogger(TagSearch.class);
+	// 结果集记录数
+	private Integer total = 0;
+
+	public Integer getTotal() {
+		return total;
+	}
+
+	public void setTotal(Integer total) {
+		this.total = total;
+	}
+
+	public ArrayList<HitBean> search(String key, int nPage, int PAGE_SIZE)
+			throws Exception {
+		ArrayList<HitBean> hits = new ArrayList<HitBean>();
+		DBUtil dbUtil = new DBUtil();
+
+		// 初始化BDB
+		BDBHelper mbdb = new BDBHelper();
+		mbdb.init();
+		String strDocs = mbdb.get("word:" + key);
+
+		HashSet<Integer> docs = null;
+		if (strDocs != null && !"".equals(strDocs)) {
+			Gson gson = new Gson();
+			// 获取标签相关的文档列表
+			docs = (HashSet<Integer>) gson.fromJson(strDocs,
+					new TypeToken<HashSet<Integer>>() {
+					}.getType());
+		}
+
+		// 遍历相关的所有文档
+		if (docs != null && docs.size() > 0) {
+			Iterator iter = docs.iterator();
+			while (iter.hasNext()) {
+				Integer docId = (Integer) iter.next();
+
+				HitBean hitBean = new HitBean();
+				SearchHit hit = new SearchHit();
+
+				// 获取文档的tfidf值
+				String tfidf = mbdb.get("tfidf:" + docId);
+				hit.setScore(Double.valueOf(tfidf).floatValue());
+
+				// 获取文档的内容
+				NoticeBean noticeBean = dbUtil.getArticleById(docId);
+				if (noticeBean != null) {
+					hit.setContent(noticeBean.getContent());
+					hit.setFileName(noticeBean.getTitle());
+				}
+
+				ArrayList<TagBean> tags = dbUtil.getWordByDocId(docId);
+
+				hitBean.setHit(hit);
+				hitBean.setTags(tags);
+
+				// 添加命中
+				hits.add(hitBean);
+			}
+		}
+
+		// 根据得分排序
+		if (hits != null && hits.size() > 0) {
+			Collections.sort(hits, new SortByTFIDF());
+		}
+
+		if (mbdb != null) {
+			mbdb.close();
+		}
+
+		total = hits.size();
+		int start = 1, end = 10;
+		ArrayList<HitBean> resultList = null;
+		if (total > 0) {
+			if (total >= (nPage * PAGE_SIZE)) {
+				start = (nPage - 1) * PAGE_SIZE;
+				end = start + PAGE_SIZE;
+			} else if (hits.size() > 0) {
+				start = (nPage - 1) * PAGE_SIZE;
+				end = total - (nPage - 1) * PAGE_SIZE;
+			}
+			resultList = new ArrayList<HitBean>(hits.subList(start, end - 1));
+		}
+		return resultList;
+	}
+
+	public ArrayList<HitBean> searchWithW2V(String key, int nPage, int PAGE_SIZE)
+			throws Exception {
+		ArrayList<HitBean> hits = new ArrayList<HitBean>();
+		DBUtil dbUtil = new DBUtil();
+
+		Gson gson = new Gson();
+
+		// 初始化BDB
+		BDBHelper mbdb = new BDBHelper();
+		mbdb.init();
+		String strDocs = mbdb.get("word:" + key);
+
+		HashSet<Integer> docs = null;
+		if (strDocs != null && !"".equals(strDocs)) {
+			// 获取标签相关的文档列表
+			docs = (HashSet<Integer>) gson.fromJson(strDocs,
+					new TypeToken<HashSet<Integer>>() {
+					}.getType());
+		}
+
+		W2vUtil w2vUtil = new W2vUtil();
+		String w2vDocTFStr = w2vUtil.getW2v(key);
+		log.debug("w2vDocTFStr = " + w2vDocTFStr);
+		if (null == w2vDocTFStr || "".equals(w2vDocTFStr)) {
+			return null;
+		}
+		HashMap<String, Double> w2vDocTF = (HashMap<String, Double>) gson
+				.fromJson(w2vDocTFStr,
+						new TypeToken<HashMap<String, Double>>() {
+						}.getType());
+
+		TFIDFUtil util = new TFIDFUtil();
+		// 遍历相关的所有文档
+		if (docs != null && docs.size() > 0) {
+			Iterator iter = docs.iterator();
+			while (iter.hasNext()) {
+				Integer docId = (Integer) iter.next();
+
+				HitBean hitBean = new HitBean();
+				SearchHit hit = new SearchHit();
+
+				String strTags = mbdb.get("tags:" + docId);
+				HashMap<String, Double> docTF = (HashMap<String, Double>) gson
+						.fromJson(strTags,
+								new TypeToken<HashMap<String, Double>>() {
+								}.getType());
+
+				Double similarity = util.calHashMapSimilarity(w2vDocTF, docTF);
+				hit.setScore(similarity.floatValue());
+
+				// 获取文档的内容
+				NoticeBean noticeBean = dbUtil.getArticleById(docId);
+				if (noticeBean != null) {
+					hit.setContent(noticeBean.getContent());
+					hit.setFileName(noticeBean.getTitle());
+				}
+
+				ArrayList<TagBean> tags = dbUtil.getWordByDocId(docId);
+
+				hitBean.setHit(hit);
+				hitBean.setTags(tags);
+
+				// 添加命中
+				hits.add(hitBean);
+			}
+		}
+
+		// 根据得分排序
+		if (hits != null && hits.size() > 0) {
+			Collections.sort(hits, new SortByTFIDF());
+		}
+
+		if (mbdb != null) {
+			mbdb.close();
+		}
+
+		total = hits.size();
+		int start = 1, end = 10;
+		ArrayList<HitBean> resultList = null;
+		if (total >= (nPage * PAGE_SIZE)) {
+			start = (nPage - 1) * PAGE_SIZE;
+			end = start + PAGE_SIZE;
+		} else if (hits.size() > 0) {
+			start = (nPage - 1) * PAGE_SIZE;
+			end = total - (nPage - 1) * PAGE_SIZE;
+		}
+		resultList = new ArrayList<HitBean>(hits.subList(start, end));
+
+		return resultList;
+	}
+
+	// 排序比较器
+	class SortByTFIDF implements Comparator {
+		public int compare(Object o1, Object o2) {
+			HitBean h1 = (HitBean) o1;
+			HitBean h2 = (HitBean) o2;
+
+			float s1 = h1.getHit().getScore();
+			float s2 = h2.getHit().getScore();
+			// 降
+			if (s2 > s1) {
+				return 1;
+			} else if (s2 < s1) {
+				return -1;
+			} else {
+
+				return 0;
+			}
+		}
+	}
+
+	public static void main(String[] args) {
+		PropHelper.getInstance();
+
+		TagSearch search = new TagSearch();
+		String key = "北京";
+
+		ArrayList<HitBean> list = null;
+		try {
+			list = search.searchWithW2V(key, 1, 5);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (list != null && list.size() > 0) {
+			for (int i = 0; i < list.size(); i++) {
+				HitBean hitBean = list.get(i);
+				SearchHit hit = hitBean.getHit();
+				log.debug(hit.getFileName() + "\n" + hit.getScore() + "\n"
+						+ hit.getContent());
+			}
+		}
+	}
+}

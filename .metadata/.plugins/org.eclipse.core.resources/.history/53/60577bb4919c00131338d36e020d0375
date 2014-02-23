@@ -1,0 +1,178 @@
+/**
+ * Mar 20, 2011 
+ * Searcher.java 
+ */
+package com.newsmths.lucene;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import net.paoding.analysis.analyzer.PaodingAnalyzer;
+
+import org.apache.log4j.Logger;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.CorruptIndexException;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.TopScoreDocCollector;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.store.SimpleFSDirectory;
+import org.apache.lucene.util.Version;
+
+import com.newsmths.bean.HitBean;
+import com.newsmths.extract.ExtractorAll;
+import com.newsmths.ide.task.TagTask;
+import com.newsmths.util.PropHelper;
+
+/**
+ * @author Administrator 10:07:03 PM
+ * 
+ *         在索引目录中，搜索我们要找的文档，返回文档信息
+ * 
+ */
+public class Search {
+	private static String FIELD_CONENT = "content";
+	private static String FIELD_NAME = "name";
+	private Integer total = 0;
+	private static Logger log = Logger.getLogger(Search.class);
+
+	public Integer getTotal() {
+		return total;
+	}
+
+	public void setTotal(Integer total) {
+		this.total = total;
+	}
+
+	/*
+	 * 构造函数
+	 * 
+	 * Searcher会与库函数重名
+	 */
+	public Search() {
+	}
+
+	public ArrayList<HitBean> search(String searchKey, int nPage, int PAGE_SIZE) {
+
+		// 存放搜索结果
+		ArrayList<HitBean> hits = new ArrayList<HitBean>();
+
+		// construct query
+		QueryParser parser = new QueryParser(Version.LUCENE_46, FIELD_CONENT,
+				new PaodingAnalyzer());
+		Query query = null;
+		try {
+			query = parser.parse(searchKey);
+		} catch (ParseException e2) {
+			e2.printStackTrace();
+		}
+
+		// dir
+		FSDirectory dir = null;
+		IndexReader reader = null;
+		IndexSearcher searcher = null;
+		try {
+			dir = SimpleFSDirectory.open(new File(PropHelper
+					.getProperty("index_path")));
+			reader = IndexReader.open(dir);
+			searcher = new IndexSearcher(reader);
+		} catch (CorruptIndexException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		log.info("Searching for: " + query.toString(FIELD_CONENT));
+
+		// 收集制定条数的数据
+		TopScoreDocCollector results = TopScoreDocCollector.create(nPage
+				* PAGE_SIZE, true);
+
+		// best top hits
+		TopDocs topDocs = null;
+		if (searcher != null) {
+			try {
+				searcher.search(query, results);
+				total = results.getTotalHits();
+				// 分页取
+				if (results.getTotalHits() >= nPage * PAGE_SIZE) {
+					topDocs = results.topDocs((nPage - 1) * PAGE_SIZE,
+							PAGE_SIZE);
+				} else if (results.getTotalHits() > 0) {
+					topDocs = results.topDocs((nPage - 1) * PAGE_SIZE,
+							results.getTotalHits() - (nPage - 1) * PAGE_SIZE);
+				} else {
+					topDocs = null;
+				}
+
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+
+		if (topDocs != null) {
+			// 文档得分
+			ScoreDoc[] scoreDocs = topDocs.scoreDocs;
+			for (int i = 0; i < topDocs.scoreDocs.length; i++) {
+				Document document = null;
+				try {
+					document = searcher.doc(scoreDocs[i].doc);
+				} catch (CorruptIndexException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				// 获取文档信息
+				String id = document.getField("id").stringValue();
+				String content = document.getField(FIELD_CONENT).stringValue();
+				String name = document.getField(FIELD_NAME).stringValue();
+				float score = scoreDocs[i].score;
+
+				// 输出文档名称以及得分值
+				log.info(name + " , " + score);
+
+				HitBean hitBean = new HitBean();
+
+				SearchHit hit = new SearchHit();
+				hit.setId(id);
+				hit.setContent(content);
+				hit.setFileName(name);
+				hit.setScore(score);
+
+				hitBean.setHit(hit);
+				hits.add(hitBean);
+			}
+		}
+		// 结束时间
+		long endTime = System.currentTimeMillis();
+
+		// 关闭读入数据流
+		try {
+			if (reader != null) {
+				reader.close();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return hits;
+	}
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		PropHelper.getInstance();
+
+		Search search = new Search();
+		search.search("兼职", 1, 10);
+		search.search("金融", 1, 10);
+		search.search("java", 1, 10);
+	}
+
+}

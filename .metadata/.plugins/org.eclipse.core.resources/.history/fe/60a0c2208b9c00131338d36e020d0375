@@ -1,0 +1,39 @@
+package com.newsmths.util;
+
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Properties;
+
+import org.apache.lucene.analysis.util.ResourceLoader;
+
+public class PropHelper {
+	public static Properties prop;
+
+	public static void getInstance() {
+		if (prop == null) {
+
+			prop = new Properties();
+			/*
+			 * InputStream in = PropHelper.class.getClassLoader()
+			 * .getResourceAsStream("conf.properties");
+			 */
+			InputStream in = null;
+			try {
+				in = new BufferedInputStream(new FileInputStream("./conf.properties"));
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			try {
+				prop.load(in);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+		}
+	}
+}

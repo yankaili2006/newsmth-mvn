@@ -1,0 +1,384 @@
+package com.newsmths.tfidf;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Vector;
+import java.util.Map.Entry;
+
+import org.apache.log4j.Logger;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
+import com.newsmths.bdb.BDBHelper;
+import com.newsmths.bean.NoticeBean;
+import com.newsmths.util.DBUtil;
+import com.newsmths.util.PropHelper;
+
+/*
+ * 文档类 文档抽象类
+ * */
+
+public class TFIDFUtil {
+	private static Logger log = Logger.getLogger(TFIDFUtil.class);
+	
+	// 所有文档，以及TF
+	public ArrayList<DocTF> docsList = new ArrayList<DocTF>();
+	// IDF
+	public DocsIDF docsIDF = new DocsIDF();
+	// 相似度similarity (1,1,1L)
+	public Vector<String> simList = new Vector();
+
+	public void addDoc(int id, String content) {
+		// 计算TF
+		DocTF tf = new DocTF(id);
+		tf.generate(content);
+		tf.print();
+		docsList.add(tf);
+
+		Iterator iter = tf.terms.entrySet().iterator();
+		while (iter.hasNext()) {
+			Map.Entry entry = (Map.Entry) iter.next();
+			String word = (String) entry.getKey();
+			// 添加到IDF
+			docsIDF.addTerm(word, id);
+		}
+	}
+
+	// 计算每个文档的TF-IDF值
+	public void calculateTFIDF() {
+		for (int i = 0; i < docsList.size(); i++) {
+			DocTF docTF = docsList.get(i);
+			Iterator iter = docTF.terms.entrySet().iterator();
+			while (iter.hasNext()) {
+				Map.Entry entry = (Map.Entry) iter.next();
+				String word = (String) entry.getKey();
+				double val = (Integer) entry.getValue();
+				double idf = docsList.size() / docsIDF.words.get(word).size();
+				double tf = val / (docTF.wordnum);
+				double tfidf = tf * idf;
+				docTF.tfidf += tfidf;
+
+				/* 添加词汇的tfidf */
+				docTF.tags.put(word, tfidf);
+			}
+			log.debug(docTF.id + "\t" + docTF.tfidf);
+		}
+	}
+
+	// 计算文档的相似度
+	public void calSimilarity() {
+		for (int i = 0; i < docsList.size(); i++) {
+			for (int j = i + 1; j < docsList.size(); j++) {
+
+				DocTF docTFa = (DocTF) docsList.get(i);
+				DocTF docTFb = (DocTF) docsList.get(j);
+
+				double similarity = calHashMapSimilarityByTF(docTFa.terms,
+						docTFb.terms);
+				simList.add(docTFa.id + "," + docTFb.id + "," + similarity);
+			}
+		}
+	}
+
+	// two HashMap<key, tf or tfidf>
+	public double calHashMapSimilarity(HashMap<String, Double> ha,
+			HashMap<String, Double> hb) {
+		double similarity = 0.0;
+
+		HashSet<String> setmix = new HashSet<String>(ha.keySet());
+		setmix.retainAll(hb.keySet());
+
+		ArrayList<Double> lista = new ArrayList<Double>();
+		ArrayList<Double> listb = new ArrayList<Double>();
+
+		if (setmix.size() == 0) {
+			similarity = 0.0;
+		} else {
+			// 计算两个向量的tfidf序列
+			Iterator itset = setmix.iterator();
+			while (itset.hasNext()) {
+				String word = (String) itset.next();
+				double tfidfa = (((ha.get(word)) + 0.0) / ha.size());
+				lista.add(tfidfa);
+				double tfidfb = ((hb.get(word)) + 0.0) / hb.size();
+				listb.add(tfidfb);
+			}
+			similarity = cosSimilarity(lista, listb);
+
+		}
+		return similarity;
+	}
+
+	// two HashMap<key, tf or tfidf>
+	public double calHashMapSimilarityByTF(HashMap<String, Integer> ha,
+			HashMap<String, Integer> hb) {
+		double similarity = 0.0;
+
+		HashSet<String> setmix = new HashSet<String>(ha.keySet());
+		setmix.retainAll(hb.keySet());
+
+		ArrayList<Double> lista = new ArrayList<Double>();
+		ArrayList<Double> listb = new ArrayList<Double>();
+
+		if (setmix.size() == 0) {
+			similarity = 0.0;
+		} else {
+			// 计算两个向量的tfidf序列
+			Iterator itset = setmix.iterator();
+			while (itset.hasNext()) {
+				String word = (String) itset.next();
+				double tfidfa = (((ha.get(word)) + 0.0) / ha.size())
+						* docsIDF.words.get(word).size();
+				lista.add(tfidfa);
+				double tfidfb = ((hb.get(word)) + 0.0) / hb.size()
+						* docsIDF.words.get(word).size();
+				listb.add(tfidfb);
+			}
+			similarity = cosSimilarity(lista, listb);
+
+		}
+		return similarity;
+	}
+
+	// 用余弦计算相似度
+	public double cosSimilarity(ArrayList<Double> lista, ArrayList<Double> listb) {
+		// 计算向量的相似度
+		double plus = 0.0, sqra = 0.0, sqrb = 0.0;
+		for (int k = 0; k < lista.size(); k++) {
+			double a = lista.get(k);
+			double b = listb.get(k);
+			plus += a * b;
+			sqra += a * a;
+			sqrb += b * b;
+		}
+		return plus / (Math.sqrt(sqra) * Math.sqrt(sqra));
+	}
+
+	// 打印每个文档的TF-IDF值
+	public void printTFIDF() {
+		for (int i = 0; i < docsList.size(); i++) {
+			DocTF docTF = docsList.get(i);
+			log.debug("tfidf:" + docTF.id + "\t" + docTF.tfidf);
+		}
+	}
+
+	// 打印相似性比对的结果
+	public void printSimilarity() {
+		for (int i = 0; i < simList.size(); i++) {
+			log.debug(simList.get(i));
+		}
+	}
+
+	// 将结果增量添加到BDB中
+	public void add2BDB() throws Exception {
+		BDBHelper mbdb = new BDBHelper();
+		mbdb.init();
+		Gson gson = new Gson();
+		// TF and TFIDF
+		ArrayList<String> idList = new ArrayList<String>();
+		for (int i = 0; i < docsList.size(); i++) {
+			DocTF tf = docsList.get(i);
+			idList.add(String.valueOf(tf.id));
+
+			// 词列表(文章ID, 词以及词频) = (id:DOCID, HashMap<String, Integer>)
+			mbdb.put("terms:" + String.valueOf(tf.id), gson.toJson(tf.terms));
+
+			// 标签(文章ID, 词以及词的TFIDF) = (tags:DOCID, HashMap<String, Double>)
+			mbdb.put("tags:" + String.valueOf(tf.id), gson.toJson(tf.tags));
+
+			// 文章的TFIDF(文章ID, 文章的IFIDF) = (tfidf:DOCID, Double)
+			mbdb.put("tfidf:" + String.valueOf(tf.id), String.valueOf(tf.tfidf));
+		}
+		// 所有ID添加到BDB
+		mbdb.put("ids", gson.toJson(idList));
+
+		// IDF
+		ArrayList<String> words = new ArrayList<String>();
+		Iterator iter = docsIDF.words.entrySet().iterator();
+		while (iter.hasNext()) {
+			Map.Entry entry = (Map.Entry) iter.next();
+			String word = (String) entry.getKey();
+			words.add(word);
+
+			HashSet<Integer> docs = ((HashSet<Integer>) entry.getValue());
+			// 每个词，包含其的文档 (词, 包含这个词的文档列表) = (word:WORD, HashSet<Integer>)
+			mbdb.put("word:" + word, gson.toJson(docs));
+		}
+		// 添加所有词汇到BDB
+		mbdb.put("words", gson.toJson(words));
+
+		// similarity
+		for (int i = 0; i < simList.size(); i++) {
+			String sim[] = simList.get(i).split(",");
+			mbdb.put(sim[0] + "," + sim[1], sim[2]);
+		}
+
+		if (mbdb != null) {
+			mbdb.close();
+		}
+	}
+
+	// 将Tags增量添加到DB中
+	public void add2DB() throws Exception {
+		DBUtil dbUtil = new DBUtil();
+		// TF and TFIDF
+		for (int i = 0; i < docsList.size(); i++) {
+			DocTF tf = docsList.get(i);
+			Iterator<Entry<String, Double>> iter = tf.tags.entrySet()
+					.iterator();
+			while (iter.hasNext()) {
+				Entry<String, Double> entry = iter.next();
+				String word = entry.getKey();
+				Double tfidf = entry.getValue();
+				// 增加word
+				dbUtil.addWord(tf.id, word, tfidf);
+			}
+
+			// 增加DOC
+			dbUtil.addDoc(tf.id, tf.tfidf);
+		}
+
+	}
+
+	// 从BDB中加载已经分析过的TF和IDF
+	public boolean loadFromBDB() {
+		BDBHelper mbdb = new BDBHelper();
+		mbdb.init();
+		Gson gson = new Gson();
+
+		// TF中的IDS
+		ArrayList<String> idList = null;
+		try {
+			String bdbIDS = mbdb.get("ids");
+			if (bdbIDS != null && !"".equals(bdbIDS)) {
+				idList = gson.fromJson(bdbIDS,
+						new TypeToken<ArrayList<String>>() {
+						}.getType());
+			}
+		} catch (JsonSyntaxException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		// 获取所有的ID列表
+		if (idList != null && idList.size() > 0) {
+			for (int i = 0; i < idList.size(); i++) {
+				String id = idList.get(i);
+				HashMap<String, Integer> terms = null;
+				HashMap<String, Double> tags = null;
+
+				String mbdbTerms = null;
+				try {
+					mbdbTerms = mbdb.get("terms:" + id);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				if (mbdbTerms != null && !"".equals(mbdbTerms)) {
+					log.debug("loading mbdbTerms:" + mbdbTerms);
+					terms = gson.fromJson(mbdbTerms,
+							new TypeToken<HashMap<String, Integer>>() {
+							}.getType());
+				}
+
+				String mbdbTags = null;
+				try {
+					mbdbTags = mbdb.get("tags:" + id);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				if (mbdbTags != null && !"".equals(mbdbTags)) {
+					log.debug("loading mbdbTags:" + mbdbTags);
+					tags = gson.fromJson(mbdbTags,
+							new TypeToken<HashMap<String, Double>>() {
+							}.getType());
+				}
+
+				// 添加所有的TF到docsList中
+				if (terms != null && tags != null) {
+					DocTF tf = new DocTF(Integer.valueOf(id), terms, tags);
+					docsList.add(tf);
+				}
+			}
+
+			log.debug("load tf : " + idList.size());
+		}
+
+		String words = null;
+		try {
+			words = mbdb.get("words");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (words != null && !"".equals(words)) {
+			ArrayList<String> wordList = gson.fromJson(words,
+					new TypeToken<ArrayList<String>>() {
+					}.getType());
+			log.debug("loading words:");
+			if (wordList != null && wordList.size() > 0) {
+				for (int i = 0; i < wordList.size(); i++) {
+					String wordStr = wordList.get(i);
+					String docStr = null;
+					try {
+						docStr = mbdb.get("word:" + wordStr);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					if (docStr != null && !"".equals(docStr)) {
+						HashSet<Integer> docSet = gson.fromJson(docStr,
+								new TypeToken<HashSet<Integer>>() {
+								}.getType());
+						if (docSet != null) {
+							// 添加到docset中
+							this.docsIDF.addWord(wordStr, docSet);
+							log.debug(wordStr + "\t");
+						}
+					}
+
+				}
+				log.debug("loading idf from bdb : " + wordList.size());
+			}
+
+		}
+
+		if (mbdb != null) {
+			mbdb.close();
+		}
+		return true;
+	}
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		TFIDFUtil tfidf = new TFIDFUtil();
+		tfidf.loadFromBDB();
+
+		DBUtil util = new DBUtil();
+		ArrayList<NoticeBean> topics = util.getTopicListPageNotTFIDF(1, 10);
+		for (int i = 0; i < topics.size(); i++) {
+			log.debug("topics.get(i).getContent():"
+					+ topics.get(i).getContent());
+			tfidf.addDoc(topics.get(i).getGid(), topics.get(i).getContent());
+		}
+
+		// tfidf.docsIDF.print();
+
+		tfidf.calculateTFIDF();
+		// tfidf.printTFIDF();
+
+		// tfidf.calSimilarity();
+		// tfidf.printSimilarity();
+
+		try {
+			tfidf.add2BDB();
+			tfidf.add2DB();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+}
