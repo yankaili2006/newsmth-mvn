@@ -31,7 +31,7 @@ public class PageViewRender {
 					}
 				}
 				sBuf.append("</h4>");
-				sBuf.append("<div> " + hit.getContent() + "</div>");
+				sBuf.append("<p>" + hit.getContent() + "</p>");
 			}
 		} else {
 			sBuf.append("什么也没找到，换个关键词试试");

@@ -19,7 +19,7 @@ import com.newsmths.tfidf.TagSearch;
 import com.newsmths.util.DBUtil;
 
 public class SubServlet extends HttpServlet {
-	private static Logger log = Logger.getLogger(TagServlet.class);
+	private static Logger log = Logger.getLogger(SubServlet.class);
 
 	/**
 	 * Constructor of the object.
@@ -143,7 +143,7 @@ public class SubServlet extends HttpServlet {
 		request.setAttribute("code", code);
 		request.setAttribute("msg", msg);
 
-		RequestDispatcher dispatcher = request.getRequestDispatcher("sub.jsp");
+		RequestDispatcher dispatcher = request.getRequestDispatcher("index.jsp");
 		dispatcher.forward(request, response);
 	}
 

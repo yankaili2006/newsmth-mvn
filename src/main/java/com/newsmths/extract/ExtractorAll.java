@@ -11,7 +11,6 @@ import com.newsmths.bean.ArticleBean;
 import com.newsmths.bean.TopicBean;
 import com.newsmths.crawl.FetchURL;
 import com.newsmths.ide.CrawlNewsmth;
-import com.newsmths.ide.SearchPage;
 import com.newsmths.util.AccountUtil;
 import com.newsmths.util.DBUtil;
 import com.newsmths.util.PropHelper;

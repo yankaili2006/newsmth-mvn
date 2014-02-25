@@ -15,9 +15,11 @@ import org.apache.log4j.Logger;
 import com.newsmths.bean.HitBean;
 import com.newsmths.lucene.Search;
 import com.newsmths.lucene.SearchHit;
+import com.newsmths.tfidf.TagSearch;
 
 public class SearchServlet extends HttpServlet {
 	private static Logger log = Logger.getLogger(SearchServlet.class);
+
 	/**
 	 * Constructor of the object.
 	 */
@@ -73,33 +75,49 @@ public class SearchServlet extends HttpServlet {
 
 		request.setCharacterEncoding("utf-8");
 		response.setCharacterEncoding("utf-8");
-		
+
 		response.setContentType("text/html");
 
 		String key = request.getParameter("key");
 		log.debug("search key = [" + key + "]");
-		
+
 		// 分页页码
 		String page = request.getParameter("p");
 		Integer nPage = 1;
 		if (null != page && !"".equals(page)) {
 			nPage = Integer.valueOf(page);
 		}
-		
-		int PAGE_SIZE = 10;
-		if (null != key && !"".equals(key) && !"null".equals(key)) {
-			log.debug("search key = [" + key + "]");
 
+		// action 动作
+		String a = request.getParameter("a");
+		if (null != a && !"".equals(a)) {
+			a = "s";
+		}
+		int PAGE_SIZE = 10;
+		ArrayList<HitBean> list = null;
+		int total = 0;
+		if ("s".equals(a)) { // search
 			Search search = new Search();
-			ArrayList<HitBean> list = search.search(key, nPage, PAGE_SIZE);
-			request.setAttribute("list", list);
-			request.setAttribute("key", key);
-			request.setAttribute("total", search.getTotal());
-			request.setAttribute("p", nPage);
+			list = search.search(key, nPage, PAGE_SIZE);
+			total = search.getTotal();
+		} else {// tag
+			TagSearch search = new TagSearch();
+			try {
+				list = search.search(key, nPage, PAGE_SIZE);
+				total = search.getTotal();
+			} catch (Exception e) {
+				e.printStackTrace();
+				log.error("", e);
+			}
 		}
 		
+		request.setAttribute("list", list);
+		request.setAttribute("key", key);
+		request.setAttribute("total", total);
+		request.setAttribute("p", nPage);
+
 		RequestDispatcher dispatcher = request
-				.getRequestDispatcher("search.jsp");
+				.getRequestDispatcher("index.jsp");
 		dispatcher.forward(request, response);
 	}
 
