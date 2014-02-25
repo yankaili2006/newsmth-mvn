@@ -1,7 +1,7 @@
 com/newsmths/extract/ExtractorAll.class
 com/newsmths/tfidf/TagSearch.class
-com/newsmths/tfidf/DocTF.class
 com/newsmths/lucene/FileReader.class
+com/newsmths/tfidf/DocTF.class
 com/newsmths/util/W2vUtil$1.class
 com/newsmths/bean/TagBean.class
 com/newsmths/bdb/WordVec$1.class
@@ -39,12 +39,10 @@ com/newsmths/bdb/BDBHelper.class
 com/newsmths/tfidf/TagSearch$2.class
 com/newsmths/bean/UserBean.class
 com/newsmths/ide/Mailer.class
-com/newsmths/ide/servlet/TagServlet.class
 com/newsmths/util/DBUtil.class
 com/newsmths/bean/ArticleBean.class
 com/newsmths/bdb/WordVec.class
 com/newsmths/crawl/FetchURL.class
-com/newsmths/ide/TagPage.class
 com/newsmths/tfidf/TFIDFUtil$5.class
 com/newsmths/ide/task/TagTask.class
 com/newsmths/ide/servlet/MailServlet.class
@@ -52,7 +50,6 @@ com/newsmths/util/PropHelper.class
 com/newsmths/crawl/ParserUtil.class
 com/newsmths/ide/servlet/InitServlet.class
 com/newsmths/ide/servlet/SubServlet.class
-com/newsmths/ide/SearchPage.class
 com/newsmths/bean/NoticeBean.class
 com/newsmths/tfidf/TagSearch$3.class
 com/newsmths/tfidf/TagSearch$4.class

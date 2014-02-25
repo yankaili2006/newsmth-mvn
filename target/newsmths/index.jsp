@@ -1,134 +1,203 @@
 <%@ page language="java" import="java.util.*" pageEncoding="utf-8"%>
 <%@ page
 	import="com.newsmths.lucene.SearchHit,com.newsmths.bean.*,java.net.*"%>
-<%@ page
-	import="com.newsmths.util.PropHelper,com.newsmths.view.PageViewRender"%>
-<%@ page
-	import="com.newsmths.view.LabelViewRender"%>
+<%@ page import="com.newsmths.view.PageViewRender"%>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
 
-<title>Searcher</title>
-<meta http-equiv="pragma" content="no-cache">
-<meta http-equiv="cache-control" content="no-cache">
-<meta http-equiv="expires" content="0">
-<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
-<meta http-equiv="description" content="This is my page">
+<title>订阅水木网</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Bootstrap -->
+<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link rel="stylesheet" type="text/css" href="jPaginate/css/style.css"
-	media="screen" />
-<style>
+<style type="text/css">
 
-#center {
-	height: 160px;
-	width: 400px;
-	vertical-align: middle;
-	line-height: 200px;
+/* Sticky footer styles
+      -------------------------------------------------- */
+html,body {
+	height: 100%;
+	/* The html and body elements cannot have any padding or margin. */
 }
 
-.demo {
-	width: 580px;
-	padding: 10px;
-	margin: 10px auto;
-	border: 1px solid #fff;
-	background-color: #f7f7f7;
+/* Set the fixed height of the footer here */
+#push,#footer {
+	height: 60px;
 }
 
-* {
-  -webkit-box-sizing: border-box;
-     -moz-box-sizing: border-box;
-          box-sizing: border-box;
+#footer {
+	background-color: #f5f5f5;
 }
 
+/* Lastly, apply responsive CSS fixes as necessary */
+@media ( max-width : 767px) {
+	#footer {
+		margin-left: -20px;
+		margin-right: -20px;
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+}
+
+.container .credit {
+	margin: 20px 0;
+}
 </style>
-<script type="text/javascript" src="jPaginate/jquery-1.3.2.js"></script>
-<script src="jPaginate/jquery.paginate.js" type="text/javascript"></script>
-
-<%
-	ArrayList<HitBean> list = (ArrayList<HitBean>) request.getAttribute("list");
-	String key = (String) request.getAttribute("key");
-	if (key == null || "".equals(key) || "null".equals(key)) {
-		key = "";
-	}
-	
-	int PAGE_SIZE = 10, total = 0, cnt = 0, p = 0;
-	Object o = request.getAttribute("total");
-	if (null != o){
-		total = (Integer) o;
-		cnt = (total-1)/PAGE_SIZE + 1;
-	}
-	o = request.getAttribute("p");
-	if (null != o){
-	   p = (Integer) o;
-	}
-%>
 </head>
 <body>
-<div id = "main">
-	<div id="center" style="width:1000px;">
-		<form name="f1" action="SearchServlet" method="get">
-			<table bgcolor="#FFFFFF" style="font-size: 9pt;" width="1000px;">
-				<tr height="60" valign="middle">
-					<td width="300px"><input name="key" size="30" maxlength="100"
-						value="<%=key%>">
-					</td>
-					<td width="150px"><input type="submit" value="搜索"></td>
-					<td width="200px"></td>
-				</tr>
-			</table>
-		</form>
-		<form name="f2" action="TagServlet" method="get">
-			<table bgcolor="#FFFFFF" style="font-size: 9pt;" width="800px">
-				<tr height="60" valign="middle">
-					<td width="300px"><input name="key" size="30" maxlength="100"
-						value="<%=key%>">
-					</td>
-					<td width="150px"><input type="submit" value="进入标签的世界">
-					</td>
-					<td width="200px"><%
-						//LabelViewRender lrender = new LabelViewRender();
-						//out.print(lrender.render());
-					%></td>
-					<td width="150px"><a href="<%=request.getContextPath()%>/sub.jsp">我要定制</a>
-					</td>
-				</tr>
-			</table>
-		</form>
+	<div class="navbar">
+		<div class="navbar-inner">
+			<div class="container">
+				<a class="btn btn-navbar" data-toggle="collapse"
+					data-target=".nav-collapse"> <span class="icon-bar"></span> <span
+					class="icon-bar"></span> <span class="icon-bar"></span>
+				</a>
+
+				<!-- Be sure to leave the brand out there if you want it shown -->
+				<a class="brand" href="index.jsp">订阅水木网</a>
+				<form class="form-inline" method="post" action="SubServlet">
+					<input type="text" class="input-small" placeholder="Email"
+						name=email> <input type="text" class="input-small"
+						name="keys">
+					<button type="submit" class="btn">订阅</button>
+				</form>
+			</div>
+		</div>
 	</div>
-	<div id="pagetxt">
+	<%
+		ArrayList<HitBean> list = (ArrayList<HitBean>) request
+				.getAttribute("list");
+		String key = (String) request.getAttribute("key");
+		if (key == null || "".equals(key) || "null".equals(key)) {
+			key = "";
+		}
+
+		int PAGE_SIZE = 10, total = 0, cnt = 0, p = 0;
+		Object o = request.getAttribute("total");
+		if (null != o) {
+			total = (Integer) o;
+			cnt = (total - 1) / PAGE_SIZE + 1;
+		}
+		o = request.getAttribute("p");
+		if (null != o) {
+			p = (Integer) o;
+		}
+
+		String a = "s"; // s: search, t:tag 
+		o = request.getAttribute("type");
+		if (null != o && !"".equals(o)) {
+			a = String.valueOf(o);
+		}
+
+		String t = "SearchServlet"; //TagServlet
+	%>
+	<div class="container">
+		<div class="row">
+			<form class="navbar-form pull-left" action="SearchServlet"
+				method="post">
+				<div class="span3"></div>
+				<div class="span3">
+					<input type="text" class="span3" name="key" value="<%=key%>">
+					<input type="hidden" name="a" value="s">
+				</div>
+				<div class="span2">
+					<button type="submit" class="btn">搜索</button>
+				</div>
+				<div class="span4">
+					<button type="submit" class="btn">进入标签的世界</button>
+				</div>
+			</form>
+		</div>
 		<%
 			PageViewRender render = new PageViewRender();
-				out.print(render.render(list));
+			out.print(render.render(list));
 		%>
+		<div class="pagination">
+			<ul>
+				<%
+					if (null != list && list.size() > 0) {
+						int MAX_P2SHOW = 10;
+						if (cnt <= MAX_P2SHOW) {
+							if (1 == p) {
+								out.print("<li class=\"disabled\"><a href=\"#\">&laquo;</a></li>");
+							} else {
+								out.print("<li><a href=\"" + t + "?key=" + key + "&p="
+										+ (p - 1) + "&a=" + a + "\">&laquo;</a></li>");
+							}
+
+							for (int i = 1; i <= cnt; i++) {
+								if (i == p) {
+									out.print("<li class=\"active\"><a href=\"" + t
+											+ "?key=" + key + "&p=" + i + "&a=" + a
+											+ "\">" + i + "</a></li>");
+								} else {
+									out.print("<li><a href=\"" + t + "?key=" + key
+											+ "&p=" + i + "&a=" + a + "\">" + i
+											+ "</a></li>");
+								}
+							}
+
+							if (cnt == p) {
+								out.print("<li class=\"disabled\"><a href=\"#\">&raquo;</a></li>");
+							} else {
+								out.print("<li><a href=\"" + t + "?key=" + key + "&p="
+										+ (p + 1) + "&a=" + a + "\">&raquo;</a></li>");
+							}
+						} else {
+							int st = p, ed = p, i = 1;
+
+							while (i < MAX_P2SHOW) {
+								if (st > 1) {
+									st--;
+									i++;
+								}
+								if (ed < cnt && i < MAX_P2SHOW) {
+									ed++;
+									i++;
+								}
+							}
+
+							if (st - 1 >= 1) {
+								out.print("li><a href=\"" + t + "?key=" + key + "&p="
+										+ (st - 1) + "&a=" + a + "\">&laquo;</a></li>");
+							} else {
+								out.print("li><a class=\"disabled\" href=\"#\">&laquo;</a></li>");
+							}
+
+							for (int j = st; j <= cnt; j++) {
+								if (p == j) {
+
+									out.print("<li class=\"active\"><a href=\"" + t
+											+ "?key=" + key + "&p=" + j + "&a=" + a
+											+ "\">" + j + "</a></li>");
+								} else {
+									out.print("<li><a href=\"" + t + "?key=" + key
+											+ "&p=" + j + "&a=" + a + "\">" + j
+											+ "</a></li>");
+								}
+							}
+
+							if (ed + 1 <= cnt) {
+								out.print("li><a href=\"" + t + "?key=" + key + "&p="
+										+ (ed + 1) + "&a=" + a + "\">&raquo;</a></li>");
+							} else {
+								out.print("li class=\"disabled\"><a href=\"#\">&raquo;</a></li>");
+							}
+						}
+					}
+				%>
+			</ul>
+		</div>
 	</div>
-	<%
-		if (null != list && list.size() > 0){
-	%>
-	<div class="demo">
-		<div id="demo2"></div>
+	<div id="footer">
+		<div class="container">
+			<p class="muted credit">
+				Created and Hosted by <a href="http://yankaili2006.github.io">Yankai Li</a>, using Bootstrap. About me: <a href="http://www.github.com/yankaili2006">GitHub</a>, <a href="http://weibo.com/u/1636216002">新浪微博</a>.
+			</p>
+		</div>
 	</div>
-	<script type="text/javascript">
-		$(function() {
-			$("#demo2").paginate({
-				count : <%=cnt%>,      //总页数
-				start : <%=p%>,        //开始显示的页数
-				display : <%=cnt%>,    //数字，分页条显示的页数
-				border : false,
-				text_color : '#888',
-				background_color : '#EEE',
-				text_hover_color : 'black',
-				background_hover_color : '#CFCFCF',
-				onChange : function(page) {
-					$("#pagetxt").load("TagPage?key=<%=key%>&p=" + page);
-				}
-			});
-		});
-	</script>
-	<%
-		}
-	%>
-	</div>
+	<script src="js/jquery.js"></script>
+	<script src="js/bootstrap.min.js"></script>
 </body>
 </html>

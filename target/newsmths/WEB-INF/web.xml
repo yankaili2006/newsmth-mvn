@@ -20,10 +20,6 @@
 		<servlet-class>com.newsmths.ide.servlet.SearchServlet</servlet-class>
 	</servlet>
 	<servlet>
-		<servlet-name>TagServlet</servlet-name>
-		<servlet-class>com.newsmths.ide.servlet.TagServlet</servlet-class>
-	</servlet>
-	<servlet>
 		<servlet-name>SubServlet</servlet-name>
 		<servlet-class>com.newsmths.ide.servlet.SubServlet</servlet-class>
 	</servlet>
@@ -31,14 +27,6 @@
 		<servlet-name>InitServlet</servlet-name>
 		<servlet-class>com.newsmths.ide.servlet.InitServlet</servlet-class>
 		<load-on-startup>0</load-on-startup>
-	</servlet>
-	<servlet>
-		<servlet-name>SearchPage</servlet-name>
-		<servlet-class>com.newsmths.ide.SearchPage</servlet-class>
-	</servlet>
-	<servlet>
-		<servlet-name>TagPage</servlet-name>
-		<servlet-class>com.newsmths.ide.TagPage</servlet-class>
 	</servlet>
 
 	<servlet-mapping>
@@ -58,24 +46,12 @@
 		<url-pattern>/SearchServlet</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
-		<servlet-name>TagServlet</servlet-name>
-		<url-pattern>/TagServlet</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
 		<servlet-name>SubServlet</servlet-name>
 		<url-pattern>/SubServlet</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>InitServlet</servlet-name>
 		<url-pattern>/InitServlet</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>SearchPage</servlet-name>
-		<url-pattern>/SearchPage</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>TagPage</servlet-name>
-		<url-pattern>/TagPage</url-pattern>
 	</servlet-mapping>
 
 	<welcome-file-list>
