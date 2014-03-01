@@ -79,6 +79,9 @@ public class SearchServlet extends HttpServlet {
 		response.setContentType("text/html");
 
 		String key = request.getParameter("key");
+		if (null == key || "".equals(key)) {
+			key = "java";
+		}
 		log.debug("search key = [" + key + "]");
 
 		// 分页页码
@@ -90,7 +93,7 @@ public class SearchServlet extends HttpServlet {
 
 		// action 动作
 		String a = request.getParameter("a");
-		if (null != a && !"".equals(a)) {
+		if (null == a || "".equals(a)) {
 			a = "s";
 		}
 		int PAGE_SIZE = 10;
@@ -105,16 +108,18 @@ public class SearchServlet extends HttpServlet {
 			try {
 				list = search.search(key, nPage, PAGE_SIZE);
 				total = search.getTotal();
+
 			} catch (Exception e) {
 				e.printStackTrace();
 				log.error("", e);
 			}
 		}
-		
+
 		request.setAttribute("list", list);
 		request.setAttribute("key", key);
 		request.setAttribute("total", total);
 		request.setAttribute("p", nPage);
+		request.setAttribute("a", a);
 
 		RequestDispatcher dispatcher = request
 				.getRequestDispatcher("index.jsp");

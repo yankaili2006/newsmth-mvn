@@ -103,9 +103,9 @@ public class TagSearch {
 			if (total >= (nPage * PAGE_SIZE)) {
 				start = (nPage - 1) * PAGE_SIZE;
 				end = start + PAGE_SIZE;
-			} else if (hits.size() > 0) {
+			} else {
 				start = (nPage - 1) * PAGE_SIZE;
-				end = total - (nPage - 1) * PAGE_SIZE;
+				end = total;
 			}
 			resultList = new ArrayList<HitBean>(hits.subList(start, end - 1));
 		}
