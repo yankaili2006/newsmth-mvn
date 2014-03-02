@@ -37,13 +37,14 @@ public class BDBHelper {
 			if (!(dirFile.exists()) && !(dirFile.isDirectory())) {
 				boolean creadok = dirFile.mkdirs();
 				if (creadok) {
-					log.info("创建目录成功，path = [" + path + "]");
+					log.error("创建目录成功，path = [" + path + "]");
 				} else {
-					log.info("创建目录失败，path = [" + path + "]");
+					log.error("创建目录失败，path = [" + path + "]");
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 
 		setUp(path, Long.valueOf(prop.getProperty("bdb_cachesize")));
@@ -64,7 +65,12 @@ public class BDBHelper {
 
 		PropHelper helper = new PropHelper();
 		Properties prop = helper.getProp();
-		open(prop.getProperty("bdb_name"));
+
+		String bdbNome = prop.getProperty("bdb_name");
+		if (null == bdbNome || "".equals(bdbNome)) {
+			bdbNome = "myDB";
+		}
+		open(bdbNome);
 	}
 
 	public void open(String dbName) {

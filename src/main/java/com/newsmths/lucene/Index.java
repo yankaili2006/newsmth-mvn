@@ -82,7 +82,7 @@ public class Index {
 		IndexWriter writer = null;
 		try {
 			IndexWriterConfig confIndex = new IndexWriterConfig(
-					Version.LUCENE_46, new PaodingAnalyzer());
+					Version.LUCENE_32, new PaodingAnalyzer());
 			confIndex.setOpenMode(OpenMode.CREATE_OR_APPEND);
 			if (IndexWriter.isLocked(dir)) {
 				IndexWriter.unlock(dir);
@@ -146,7 +146,7 @@ public class Index {
 		IndexWriter writer = null;
 		try {
 			IndexWriterConfig confIndex = new IndexWriterConfig(
-					Version.LUCENE_46, new PaodingAnalyzer());
+					Version.LUCENE_32, new PaodingAnalyzer());
 			confIndex.setOpenMode(OpenMode.CREATE_OR_APPEND);
 			if (IndexWriter.isLocked(dir)) {
 				IndexWriter.unlock(dir);

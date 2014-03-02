@@ -48,7 +48,7 @@
 		<!-- lucene -->
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-analyzers-common</artifactId>
+			<artifactId>lucene-core</artifactId>
 			<version>4.6.0</version>
 			<type>jar</type>
 			<scope>compile</scope>
@@ -92,7 +92,6 @@
 			<artifactId>servlet-api</artifactId>
 			<version>2.5</version>
 		</dependency>
-
 		<dependency>
 			<groupId>net.paoding</groupId>
 			<artifactId>paoding-analysis</artifactId>

@@ -56,10 +56,12 @@ html,body {
 
 				<!-- Be sure to leave the brand out there if you want it shown -->
 				<a class="brand" href="index.jsp">订阅水木网</a>
-				<form class="form-inline" method="post" action="SubServlet">
-					<input type="text" class="input-small" placeholder="Email"
-						name=email> <input type="text" class="input-small"
-						name="keys">
+				<form class="navbar-form pull-right" action="SubServlet"
+					method="post">
+					<input type="text" class="span2" name="email"
+						placeholder="abc@163.com"> <span>&nbsp;&nbsp;</span> <input
+						type="text" class="span2" name="keyws" placeholder="key1 key2">
+					<span>&nbsp;&nbsp;</span>
 					<button type="submit" class="btn">订阅</button>
 				</form>
 			</div>
@@ -84,8 +86,8 @@ html,body {
 			p = (Integer) o;
 		}
 
-		String a = "s"; // s: search, t:tag 
-		o = request.getAttribute("type");
+		String a = "s"; // action type s: search, t:tag 
+		o = request.getAttribute("a");
 		if (null != o && !"".equals(o)) {
 			a = String.valueOf(o);
 		}
@@ -95,17 +97,19 @@ html,body {
 	<div class="container">
 		<div class="row">
 			<form class="navbar-form pull-left" action="SearchServlet"
-				method="post">
+				method="post" name="search">
 				<div class="span3"></div>
 				<div class="span3">
 					<input type="text" class="span3" name="key" value="<%=key%>">
-					<input type="hidden" name="a" value="s">
+					<input type="hidden" name="a" id="a" value="<%=a%>">
 				</div>
 				<div class="span2">
-					<button type="submit" class="btn">搜索</button>
+					<button type="submit" class="btn"
+						onclick="document.getElementById('a').value='s';">搜索</button>
 				</div>
 				<div class="span4">
-					<button type="submit" class="btn">进入标签的世界</button>
+					<button type="submit" class="btn"
+						onclick="document.getElementById('a').value='t';">进入标签的世界</button>
 				</div>
 			</form>
 		</div>
@@ -193,7 +197,10 @@ html,body {
 	<div id="footer">
 		<div class="container">
 			<p class="muted credit">
-				Created and Hosted by <a href="http://yankaili2006.github.io">Yankai Li</a>, using Bootstrap. About me: <a href="http://www.github.com/yankaili2006">GitHub</a>, <a href="http://weibo.com/u/1636216002">新浪微博</a>.
+				Created and Hosted by <a href="http://yankaili2006.github.io"
+					target="_blank">Yankai Li</a>, using Bootstrap. About me: <a
+					href="http://www.github.com/yankaili2006" target="_blank">GitHub</a>,
+				<a href="http://weibo.com/u/1636216002" target="_blank">新浪微博</a>.
 			</p>
 		</div>
 	</div>

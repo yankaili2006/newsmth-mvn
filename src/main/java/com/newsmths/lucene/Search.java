@@ -15,11 +15,11 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.FSDirectory;
@@ -65,14 +65,13 @@ public class Search {
 		ArrayList<HitBean> hits = new ArrayList<HitBean>();
 
 		// construct query
-		QueryParser parser = new QueryParser(Version.LUCENE_46, FIELD_CONENT,
-				new PaodingAnalyzer());
-		Query query = null;
-		try {
-			query = parser.parse(searchKey);
-		} catch (ParseException e2) {
-			e2.printStackTrace();
-		}
+		/*
+		 * QueryParser parser = new QueryParser(Version.LUCENE_32, FIELD_CONENT,
+		 * new PaodingAnalyzer()); Query query = null; try { query =
+		 * parser.parse(searchKey); } catch (ParseException e2) {
+		 * e2.printStackTrace(); }
+		 */
+		Query query = new TermQuery(new Term(FIELD_CONENT, searchKey));
 
 		// dir
 		FSDirectory dir = null;
@@ -81,7 +80,8 @@ public class Search {
 		try {
 			PropHelper helper = new PropHelper();
 			Properties prop = helper.getProp();
-			dir = SimpleFSDirectory.open(new File(prop.getProperty("index_path")));
+			dir = SimpleFSDirectory.open(new File(prop
+					.getProperty("index_path")));
 			reader = IndexReader.open(dir);
 			searcher = new IndexSearcher(reader);
 		} catch (CorruptIndexException e) {

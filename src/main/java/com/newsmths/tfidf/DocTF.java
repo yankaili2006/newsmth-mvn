@@ -65,7 +65,6 @@ public class DocTF {
 			ts = analyzer.tokenStream("text", reader);
 		} catch (IOException e1) {
 			e1.printStackTrace();
-			log.error("", e1);
 		}
 		// 添加工具类 注意：以下这些与之前lucene2.x版本不同的地方
 		CharTermAttribute offAtt = (CharTermAttribute) ts
