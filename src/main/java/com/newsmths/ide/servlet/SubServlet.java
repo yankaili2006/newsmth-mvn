@@ -1,6 +1,7 @@
 package com.newsmths.ide.servlet;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import javax.servlet.RequestDispatcher;
@@ -81,17 +82,13 @@ public class SubServlet extends HttpServlet {
 
 		String email = request.getParameter("email");
 		String keyws = request.getParameter("keyws");
-		log.debug("email = [" + email + "]");
-		log.debug("keyws = [" + keyws + "]");
 
-		String code = "0";
+		System.out.println("email = " + email + "keyws = " + keyws);
+
 		String msg = "订阅失败！";
-
 		if (email == null || "".equals(email)) {
-			code = "1";
 			msg = "邮箱不能为空！";
 		} else if (keyws == null || "".equals(keyws)) {
-			code = "2";
 			msg = "关键词不能为空！";
 		} else {
 			DBUtil util = new DBUtil();
@@ -102,7 +99,6 @@ public class SubServlet extends HttpServlet {
 
 			int id = util.addUser(uBean);
 			if (id <= 0) {
-				code = "3";
 				msg = "创建用户失败！";
 			} else {
 				uBean.setId(id);
@@ -114,7 +110,6 @@ public class SubServlet extends HttpServlet {
 					lBean.setLabel(label);
 					int lid = util.addLabel(lBean);
 					if (id <= 0) {
-						code = "4";
 						msg = "创建标签失败！";
 						break;
 					} else {
@@ -127,11 +122,8 @@ public class SubServlet extends HttpServlet {
 						ulBean.setuEmail(uBean.getEmail());
 
 						if (!util.addUserLabel(ulBean)) {
-							code = "5";
 							msg = "已经订阅过了！";
 						} else {
-
-							code = "0";
 							msg = "订阅成功！";
 						}
 					}
@@ -140,11 +132,14 @@ public class SubServlet extends HttpServlet {
 			}
 		}
 
-		request.setAttribute("code", code);
-		request.setAttribute("msg", msg);
-
-		RequestDispatcher dispatcher = request.getRequestDispatcher("index.jsp");
-		dispatcher.forward(request, response);
+		System.out.println(msg);
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setHeader("Pragma",   "no-cache");   //HTTP   1.0  
+		response.setDateHeader("Expires",   0);   //prevents   caching   at   the   proxy   server  
+		PrintWriter out = response.getWriter();
+		out.write(msg);
+		out.flush();
+		out.close();
 	}
 
 	/**

@@ -117,7 +117,7 @@ public class InitServlet extends HttpServlet {
 		final long DELAY_TENMIN = 60 * 1000;
 		
 		Timer timerCrawler = new Timer("抓取", true);
-		timerCrawler.schedule(new CrawlTask(), NO_DELAY, MILLIS_IN_HOUR * 2);
+		timerCrawler.schedule(new CrawlTask(), NO_DELAY, MILLIS_IN_HOUR);
 		
 		Timer timerIndexer = new Timer("索引", true);
 		timerIndexer.schedule(new IndexTask(), NO_DELAY, MILLIS_IN_HOUR);

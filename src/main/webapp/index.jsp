@@ -44,6 +44,28 @@ html,body {
 	margin: 20px 0;
 }
 </style>
+<script src="js/jquery-1.11.0.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#btnsub").click(function() {
+			htmlobj = $.ajax({
+				url : "SubServlet",
+				type : "GET",
+				data : {
+					"email" : $("#email").val(),
+					"keyws" : $("#keyws").val()
+				},
+				dataType : "json",
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				async : false
+			});
+			alert(htmlobj.responseText);
+			$("#email").val="";
+			$("#keyws").val= "";
+		});
+	});
+</script>
 </head>
 <body>
 	<div class="navbar">
@@ -56,13 +78,12 @@ html,body {
 
 				<!-- Be sure to leave the brand out there if you want it shown -->
 				<a class="brand" href="index.jsp">订阅水木网</a>
-				<form class="navbar-form pull-right" action="SubServlet"
-					method="post">
-					<input type="text" class="span2" name="email"
+				<form class="navbar-form pull-right">
+					<input type="text" class="span2" id="email"
 						placeholder="abc@163.com"> <span>&nbsp;&nbsp;</span> <input
-						type="text" class="span2" name="keyws" placeholder="key1 key2">
+						type="text" class="span2" id="keyws" placeholder="key1 key2">
 					<span>&nbsp;&nbsp;</span>
-					<button type="submit" class="btn">订阅</button>
+					<button type="button" id="btnsub" class="btn" name=“btnsub”>订阅</button>
 				</form>
 			</div>
 		</div>
@@ -231,7 +252,6 @@ html,body {
 			</p>
 		</div>
 	</div>
-	<script src="js/jquery.js"></script>
-	<script src="js/bootstrap.min.js"></script>
+
 </body>
 </html>
