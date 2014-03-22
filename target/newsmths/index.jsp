@@ -44,6 +44,28 @@ html,body {
 	margin: 20px 0;
 }
 </style>
+<script src="js/jquery-1.11.0.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#btnsub").click(function() {
+			htmlobj = $.ajax({
+				url : "SubServlet",
+				type : "GET",
+				data : {
+					"email" : $("#email").val(),
+					"keyws" : $("#keyws").val()
+				},
+				dataType : "json",
+				contentType: "application/x-www-form-urlencoded; charset=utf-8",
+				async : false
+			});
+			alert(htmlobj.responseText);
+			$("#email").val="";
+			$("#keyws").val= "";
+		});
+	});
+</script>
 </head>
 <body>
 	<div class="navbar">
@@ -56,13 +78,12 @@ html,body {
 
 				<!-- Be sure to leave the brand out there if you want it shown -->
 				<a class="brand" href="index.jsp">订阅水木网</a>
-				<form class="navbar-form pull-right" action="SubServlet"
-					method="post">
-					<input type="text" class="span2" name="email"
+				<form class="navbar-form pull-right">
+					<input type="text" class="span2" id="email"
 						placeholder="abc@163.com"> <span>&nbsp;&nbsp;</span> <input
-						type="text" class="span2" name="keyws" placeholder="key1 key2">
+						type="text" class="span2" id="keyws" placeholder="key1 key2">
 					<span>&nbsp;&nbsp;</span>
-					<button type="submit" class="btn">订阅</button>
+					<button type="button" id="btnsub" class="btn" name=“btnsub”>订阅</button>
 				</form>
 			</div>
 		</div>
@@ -114,8 +135,35 @@ html,body {
 			</form>
 		</div>
 		<%
-			PageViewRender render = new PageViewRender();
-			out.print(render.render(list));
+			//PageViewRender render = new PageViewRender();
+			//out.print(render.render(list));
+			if (list != null && list.size() > 0) {
+				out.print("<hr></hr>");
+
+				for (int i = 0; i < list.size(); i++) {
+					HitBean hitBean = list.get(i);
+					SearchHit hit = hitBean.getHit();
+					ArrayList<TagBean> tags = hitBean.getTags();
+					out.print("<h2>" + hit.getFileName() + "</h2><h4>相关度 :"
+							+ hit.getScore() + "</h4>");
+					out.print("<h4>");
+					// 打印标签
+					if (tags != null && tags.size() > 0) {
+						for (int j = 0; j < tags.size() && j < 10; j++) {
+							TagBean tag = tags.get(j);
+							out.print("<a href='SearchServlet?key="
+									+ tag.getWord() + "&p=" + p + "&a=" + a
+									+ "'>" + tag.getWord() + "</a>" + ":"
+									+ tag.getTfidf()
+									+ "&nbsp;&nbsp;&nbsp;&nbsp;");
+						}
+					}
+					out.print("</h4>");
+					out.print("<p>" + hit.getContent() + "</p>");
+				}
+			} else {
+				out.print("什么也没找到，换个关键词试试");
+			}
 		%>
 		<div class="pagination">
 			<ul>
@@ -204,7 +252,6 @@ html,body {
 			</p>
 		</div>
 	</div>
-	<script src="js/jquery.js"></script>
-	<script src="js/bootstrap.min.js"></script>
+
 </body>
 </html>
