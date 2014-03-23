@@ -6,11 +6,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.paoding.analysis.analyzer.PaodingAnalyzer;
+
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
-import net.paoding.analysis.analyzer.PaodingAnalyzer;
 
 /*
  * TF文档类，保存一个文件中所有的IF信息
