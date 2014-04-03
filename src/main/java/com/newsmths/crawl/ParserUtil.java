@@ -2,6 +2,7 @@ package com.newsmths.crawl;
 
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
 import org.htmlparser.Parser;
 import org.htmlparser.filters.AndFilter;
 import org.htmlparser.filters.HasAttributeFilter;
@@ -10,6 +11,8 @@ import org.htmlparser.util.NodeList;
 import org.htmlparser.util.ParserException;
 
 public class ParserUtil {
+
+	private static Logger log = Logger.getLogger(ParserUtil.class);
 
 	private void parse(String url) throws ParserException {
 		String DW_HOME_PAGE_URL = url;
@@ -22,16 +25,17 @@ public class ParserUtil {
 		NodeList divOfTab1 = htmlParser.extractAllNodesThatMatch(new AndFilter(
 				new TagNameFilter("a"), new HasAttributeFilter("class",
 						"fn-left w210 rrd-dimgray fn-text-overflow")));
-		
+
 		System.out.println(divOfTab1.elementAt(0).toHtml());
 		if (divOfTab1 != null && divOfTab1.size() > 0) {
-			
-System.out.println(divOfTab1.elementAt(0).getChildren().size());
+
+			System.out.println(divOfTab1.elementAt(0).getChildren().size());
 			// 获取指定 div 标签的子节点中的 <li> 节点
-			NodeList itemLiList = divOfTab1.extractAllNodesThatMatch(new AndFilter(
-					new TagNameFilter("li"), new HasAttributeFilter("id",
+			NodeList itemLiList = divOfTab1
+					.extractAllNodesThatMatch(new AndFilter(new TagNameFilter(
+							"li"), new HasAttributeFilter("id",
 							"loan-list-header")));
-			
+
 			System.out.println(itemLiList.size());
 			if (itemLiList != null && itemLiList.size() > 0) {
 				for (int i = 0; i < itemLiList.size(); ++i) {
