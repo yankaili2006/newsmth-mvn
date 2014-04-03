@@ -58,6 +58,7 @@ public class BDBHelper {
 			env = new Environment(new File(path), envConfig);
 		} catch (DatabaseException e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 	}
 
@@ -80,6 +81,7 @@ public class BDBHelper {
 			db = env.openDatabase(null, dbName, dbConfig);
 		} catch (DatabaseException e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 	}
 
@@ -93,6 +95,7 @@ public class BDBHelper {
 			}
 		} catch (DatabaseException e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 	}
 
@@ -136,6 +139,7 @@ public class BDBHelper {
 				mbdb.put(key, value);
 			} catch (Exception e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 		if (mbdb != null) {

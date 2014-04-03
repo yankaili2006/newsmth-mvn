@@ -233,6 +233,7 @@ public class TagSearch {
 			list = search.searchWithW2V(key, 1, 5);
 		} catch (Exception e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 		if (list != null && list.size() > 0) {
 			for (int i = 0; i < list.size(); i++) {

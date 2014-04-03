@@ -88,6 +88,7 @@ public class DocTF {
 
 			} catch (IOException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 	}

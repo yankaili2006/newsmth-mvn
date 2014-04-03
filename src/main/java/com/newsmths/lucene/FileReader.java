@@ -7,6 +7,10 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
+import org.apache.log4j.Logger;
+
+import com.newsmths.ide.task.MailTask;
+
 /*
  * 
  * 获取文件内容
@@ -14,6 +18,8 @@ import java.io.Reader;
  * */
 public class FileReader {
 
+	private static Logger log = Logger.getLogger(FileReader.class);
+	
 	public static String readText(File file){
 		String content = "";
 		Reader re = null;
@@ -27,8 +33,10 @@ public class FileReader {
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} catch (IOException e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 		return content;
 	}

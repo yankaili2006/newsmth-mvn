@@ -10,6 +10,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import org.apache.log4j.Logger;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.newsmths.bdb.BDBHelper;
@@ -17,6 +19,8 @@ import com.newsmths.bean.NoticeBean;
 import com.newsmths.tfidf.TFIDFUtil;
 
 public class W2vUtil {
+
+	private static Logger log = Logger.getLogger(W2vUtil.class);
 
 	public void genWordFile() {
 		// 初始化BDB
@@ -27,6 +31,7 @@ public class W2vUtil {
 			strWords = mbdb.get("words");
 		} catch (Exception e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 
 		Gson gson = new Gson();
@@ -50,16 +55,20 @@ public class W2vUtil {
 
 			try {
 				// FileOutputStream out = new FileOutputStream("words.txt");
-				//OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream("words.txt"), "UTF-8", true);
-				//out.write(sBlder.toString());
-				//out.flush();
-				//out.close();
-				PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream("words.txt"), "UTF-8"), true);
+				// OutputStreamWriter out = new OutputStreamWriter(new
+				// FileOutputStream("words.txt"), "UTF-8", true);
+				// out.write(sBlder.toString());
+				// out.flush();
+				// out.close();
+				PrintWriter pw = new PrintWriter(new OutputStreamWriter(
+						new FileOutputStream("words.txt"), "UTF-8"), true);
 				pw.println(sBlder.toString());
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
+				log.error("", e);
 			} catch (IOException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 
 		}
@@ -89,6 +98,7 @@ public class W2vUtil {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 		return sBuff.toString();
 	}

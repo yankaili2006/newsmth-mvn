@@ -74,8 +74,10 @@ public class Index {
 			searcher = new IndexSearcher(reader);
 		} catch (CorruptIndexException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} catch (IOException e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 
 		// 写索引到文件系统
@@ -95,10 +97,13 @@ public class Index {
 			}
 		} catch (CorruptIndexException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} catch (LockObtainFailedException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} catch (IOException e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 	}
 
@@ -124,6 +129,7 @@ public class Index {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 
 		// 存取索引的目录
@@ -137,8 +143,10 @@ public class Index {
 			// searcher = new IndexSearcher(reader);
 		} catch (CorruptIndexException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} catch (IOException e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 
 		ArrayList topics = null;
@@ -184,8 +192,10 @@ public class Index {
 							new Term("id", String.valueOf(bean.getGid())), doc);
 				} catch (CorruptIndexException e) {
 					e.printStackTrace();
+					log.error("", e);
 				} catch (IOException e) {
 					e.printStackTrace();
+					log.error("", e);
 				}
 			}
 			nPos += topics.size();
@@ -198,10 +208,13 @@ public class Index {
 			}
 		} catch (CorruptIndexException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} catch (LockObtainFailedException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} catch (IOException e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 
 	}

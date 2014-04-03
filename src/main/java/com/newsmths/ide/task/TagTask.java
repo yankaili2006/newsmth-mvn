@@ -37,6 +37,7 @@ public class TagTask extends TimerTask {
 				tfidf.add2DB();
 			} catch (Exception e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 			log.info("执行标签任务完成..."); // 任务完成
 			

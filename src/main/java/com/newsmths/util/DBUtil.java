@@ -178,12 +178,14 @@ public class DBUtil {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 
@@ -264,12 +266,14 @@ public class DBUtil {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 
@@ -302,12 +306,14 @@ public class DBUtil {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 		return true;
@@ -338,12 +344,14 @@ public class DBUtil {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 
@@ -364,11 +372,13 @@ public class DBUtil {
 			Class.forName("com.mysql.jdbc.Driver");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 		try {
 			conn = DriverManager.getConnection(url, username, password);
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 		return conn;
 	}
@@ -418,12 +428,14 @@ public class DBUtil {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 
@@ -484,12 +496,14 @@ public class DBUtil {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 
@@ -521,12 +535,14 @@ public class DBUtil {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 
@@ -568,12 +584,14 @@ public class DBUtil {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 
@@ -605,12 +623,14 @@ public class DBUtil {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 
@@ -642,6 +662,7 @@ public class DBUtil {
 					buffer = new String(decoder.decodeBuffer(content), "UTF-8");
 				} catch (IOException e) {
 					e.printStackTrace();
+					log.error("", e);
 				}
 
 				buffer = buffer.replaceAll("\\\\n\\\\r", "<br>");
@@ -660,12 +681,14 @@ public class DBUtil {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 
@@ -697,6 +720,7 @@ public class DBUtil {
 					buffer = new String(decoder.decodeBuffer(content), "UTF-8");
 				} catch (IOException e) {
 					e.printStackTrace();
+					log.error("", e);
 				}
 
 				buffer = buffer.replaceAll("\\\\n\\\\r", "<br>");
@@ -714,12 +738,14 @@ public class DBUtil {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 		return list;
@@ -750,6 +776,7 @@ public class DBUtil {
 					buffer = new String(decoder.decodeBuffer(content), "UTF-8");
 				} catch (IOException e) {
 					e.printStackTrace();
+					log.error("", e);
 				}
 
 				buffer = buffer.replaceAll("\\\\n\\\\r", "<br>");
@@ -767,12 +794,14 @@ public class DBUtil {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 
@@ -805,6 +834,7 @@ public class DBUtil {
 					buffer = new String(decoder.decodeBuffer(content), "UTF-8");
 				} catch (IOException e) {
 					e.printStackTrace();
+					log.error("", e);
 				}
 
 				buffer = buffer.replaceAll("\\\\n\\\\r", "<br>");
@@ -821,12 +851,14 @@ public class DBUtil {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 
@@ -858,12 +890,14 @@ public class DBUtil {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 
@@ -905,12 +939,14 @@ public class DBUtil {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 
@@ -948,12 +984,14 @@ public class DBUtil {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 
@@ -994,12 +1032,14 @@ public class DBUtil {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 
@@ -1027,8 +1067,10 @@ public class DBUtil {
 				instream.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			} catch (IOException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 		return out;
@@ -1068,12 +1110,14 @@ public class DBUtil {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 		return list;
@@ -1121,12 +1165,14 @@ public class DBUtil {
 			return max + 1;
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 		return 0;
@@ -1173,12 +1219,14 @@ public class DBUtil {
 			return max + 1;
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 		return 0;
@@ -1215,12 +1263,14 @@ public class DBUtil {
 			return true;
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 		return true;
@@ -1253,12 +1303,14 @@ public class DBUtil {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 		return list;
@@ -1284,6 +1336,7 @@ public class DBUtil {
 					buffer = new String(decoder.decodeBuffer(a), "UTF-8");
 				} catch (IOException e) {
 					e.printStackTrace();
+					log.error("", e);
 				}
 				System.out.println("content = [" + buffer + "]");
 
@@ -1293,6 +1346,7 @@ public class DBUtil {
 					buffer = new String(decoder.decodeBuffer(a), "UTF-8");
 				} catch (IOException e) {
 					e.printStackTrace();
+					log.error("", e);
 				}
 				System.out.println("atmsg = [" + buffer + "]");
 
@@ -1302,21 +1356,22 @@ public class DBUtil {
 					buffer = new String(decoder.decodeBuffer(a), "UTF-8");
 				} catch (IOException e) {
 					e.printStackTrace();
+					log.error("", e);
 				}
 				System.out.println("msg = [" + buffer + "]");
 				System.out
 						.println("------------------------------------------------------------");
 			}
 		} catch (SQLException e) {
-			System.out.println(e.getMessage());
 			e.printStackTrace();
+			log.error("", e);
 		} finally {
 			try {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException e) {
-				System.out.println(e.getMessage());
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 	}

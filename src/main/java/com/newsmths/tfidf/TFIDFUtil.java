@@ -261,8 +261,10 @@ public class TFIDFUtil {
 			}
 		} catch (JsonSyntaxException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} catch (Exception e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 
 		// 获取所有的ID列表
@@ -277,6 +279,7 @@ public class TFIDFUtil {
 					mbdbTerms = mbdb.get("terms:" + id);
 				} catch (Exception e) {
 					e.printStackTrace();
+					log.error("", e);
 				}
 				if (mbdbTerms != null && !"".equals(mbdbTerms)) {
 					log.debug("loading mbdbTerms:" + mbdbTerms);
@@ -290,6 +293,7 @@ public class TFIDFUtil {
 					mbdbTags = mbdb.get("tags:" + id);
 				} catch (Exception e) {
 					e.printStackTrace();
+					log.error("", e);
 				}
 				if (mbdbTags != null && !"".equals(mbdbTags)) {
 					log.debug("loading mbdbTags:" + mbdbTags);
@@ -313,6 +317,7 @@ public class TFIDFUtil {
 			words = mbdb.get("words");
 		} catch (Exception e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 		if (words != null && !"".equals(words)) {
 			ArrayList<String> wordList = gson.fromJson(words,
@@ -327,6 +332,7 @@ public class TFIDFUtil {
 						docStr = mbdb.get("word:" + wordStr);
 					} catch (Exception e) {
 						e.printStackTrace();
+						log.error("", e);
 					}
 					if (docStr != null && !"".equals(docStr)) {
 						HashSet<Integer> docSet = gson.fromJson(docStr,
@@ -379,6 +385,7 @@ public class TFIDFUtil {
 			tfidf.add2DB();
 		} catch (Exception e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 	}
 }

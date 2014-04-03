@@ -36,6 +36,7 @@ public class WordVec {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 
 	}

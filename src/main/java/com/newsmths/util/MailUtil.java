@@ -62,14 +62,15 @@ public class MailUtil {
 			transport.sendMessage(msg, msg.getAllRecipients());
 		} catch (NoSuchProviderException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} catch (MessagingException e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 	}
 
 
-
-	public void SendJavaMail(String email, String subject, String body) {
+	public boolean SendJavaMail(String email, String subject, String body) {
 		Properties p = new Properties();
 		p.put("mail.smtp.host", smtpHost);
 		p.put("mail.smtp.port", "25");
@@ -97,10 +98,13 @@ public class MailUtil {
 		} catch (AddressException e) {
 			e.printStackTrace();
 			log.error("发送邮件失败:", e);
+			return false;
 		} catch (MessagingException e) {
 			e.printStackTrace();
 			log.error("发送邮件失败:", e);
+			return false;
 		}
+		return true;
 	}
 
 	public static void main(String args[]) throws UnsupportedEncodingException {

@@ -86,8 +86,10 @@ public class Search {
 			searcher = new IndexSearcher(reader);
 		} catch (CorruptIndexException e) {
 			e.printStackTrace();
+			log.error("", e);
 		} catch (IOException e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 
 		log.info("Searching for: " + query.toString(FIELD_CONENT));
@@ -127,8 +129,10 @@ public class Search {
 					document = searcher.doc(scoreDocs[i].doc);
 				} catch (CorruptIndexException e) {
 					e.printStackTrace();
+					log.error("", e);
 				} catch (IOException e) {
 					e.printStackTrace();
+					log.error("", e);
 				}
 				// 获取文档信息
 				String id = document.getField("id").stringValue();
@@ -161,6 +165,7 @@ public class Search {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 		return hits;
 	}

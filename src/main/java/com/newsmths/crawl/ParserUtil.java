@@ -53,6 +53,7 @@ System.out.println(divOfTab1.elementAt(0).getChildren().size());
 			util.parse("http://www.renrendai.com/lend/loanList.action");
 		} catch (ParserException e) {
 			e.printStackTrace();
+			log.error("", e);
 		}
 
 	}

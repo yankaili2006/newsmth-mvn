@@ -27,22 +27,19 @@ public class Mailer {
 		DBUtil util = new DBUtil();
 		ArrayList<NoticeBean> list = null;
 		StringBuffer content = new StringBuffer();
-		do {
-			list = util.getNoticeListPage(email, 10);
-			util.UpdateNotice(list);
+		
+		list = util.getNoticeListPage(email, 20);
 
-			if (list.size() <= 0)
-				return false;
+		if (list.size() <= 0)
+			return false;
 
-			for (int j = 0; j < list.size(); j++) {
-				NoticeBean bean = (NoticeBean) list.get(j);
-				content.append("<h1>");
-				content.append(bean.getTitle());
-				content.append("</h1>");
-				content.append("<p>" + bean.getContent() + "</p>");
-			}
-
-		} while (list != null && list.size() == 10);
+		for (int j = 0; j < list.size(); j++) {
+			NoticeBean bean = (NoticeBean) list.get(j);
+			content.append("<h1>");
+			content.append(bean.getTitle());
+			content.append("</h1>");
+			content.append("<p>" + bean.getContent() + "</p>");
+		}
 
 		/* send mail */
 		Date nowTime = new Date();
@@ -55,7 +52,7 @@ public class Mailer {
 		Properties prop = helper.getProp();
 		String mailType = prop.getProperty("MAIL");
 		if ("javasendmail".equals(mailType)) {
-			mailer.SendJavaMail(email, sTime, content.toString());
+			return mailer.SendJavaMail(email, sTime, content.toString());
 		} else if ("linuxmail".equals(mailType)) {
 			try {
 				String cmd = "echo '" + content.toString() + "' | mail -s "
@@ -65,9 +62,11 @@ public class Mailer {
 			} catch (IOException e) {
 				e.printStackTrace();
 				log.error("", e);
+				return false;
 			}
 		}
 
+		util.UpdateNotice(list);
 		return true;
 	}
 

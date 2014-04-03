@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
 public class PropHelper {
 
+	private static Logger log = Logger.getLogger(PropHelper.class);
 	public Properties getProp() {
 		Properties prop = null;
 		if (prop == null) {
@@ -15,6 +18,7 @@ public class PropHelper {
 						.getResourceAsStream("conf.properties"));
 			} catch (IOException e) {
 				e.printStackTrace();
+				log.error("", e);
 			}
 		}
 		return prop;

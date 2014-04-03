@@ -29,7 +29,7 @@ public class FetchURL {
 	 * 
 	 */
 	public FetchURL() {
-		
+
 	}
 
 	/**
@@ -43,6 +43,7 @@ public class FetchURL {
 			url = new URL(urlString);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
+			log.error("", e);
 			return null;
 		}
 		// 创建HTTP连接
@@ -54,6 +55,7 @@ public class FetchURL {
 			connection.connect();
 		} catch (IOException e) {
 			e.printStackTrace();
+			log.error("", e);
 			return null;
 		}
 
@@ -91,6 +93,7 @@ public class FetchURL {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+			log.error("", e);
 			return null;
 		}
 
