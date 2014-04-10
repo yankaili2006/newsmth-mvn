@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.newsmths.bdb.BDBHelper;
+import com.newsmths.bean.ArticleBean;
 import com.newsmths.bean.HitBean;
 import com.newsmths.bean.NoticeBean;
 import com.newsmths.bean.TagBean;
@@ -58,6 +59,7 @@ public class TagSearch {
 		}
 
 		// 遍历相关的所有文档
+		DBUtil util = new DBUtil();
 		if (docs != null && docs.size() > 0) {
 			Iterator iter = docs.iterator();
 			while (iter.hasNext()) {
@@ -71,14 +73,16 @@ public class TagSearch {
 				hit.setScore(Double.valueOf(tfidf).floatValue());
 
 				// 获取文档的内容
-				NoticeBean noticeBean = dbUtil.getArticleById(docId);
-				if (noticeBean != null) {
-					hit.setContent(noticeBean.getContent());
-					hit.setFileName(noticeBean.getTitle());
+				ArticleBean articleBean = dbUtil.getArticleById(docId);
+				if (articleBean != null) {
+					hit.setContent(articleBean.getContent());
+					hit.setFileName(articleBean.getTitle());
 				}
 
 				ArrayList<TagBean> tags = dbUtil.getWordByDocId(docId);
-
+				ArticleBean abean = util.getArticleById(Integer.valueOf(docId));
+				hit.setAbean(abean);
+				
 				hitBean.setHit(hit);
 				hitBean.setTags(tags);
 
@@ -163,10 +167,10 @@ public class TagSearch {
 				hit.setScore(similarity.floatValue());
 
 				// 获取文档的内容
-				NoticeBean noticeBean = dbUtil.getArticleById(docId);
-				if (noticeBean != null) {
-					hit.setContent(noticeBean.getContent());
-					hit.setFileName(noticeBean.getTitle());
+				ArticleBean articleBean = dbUtil.getArticleById(docId);
+				if (articleBean != null) {
+					hit.setContent(articleBean.getContent());
+					hit.setFileName(articleBean.getTitle());
 				}
 
 				ArrayList<TagBean> tags = dbUtil.getWordByDocId(docId);

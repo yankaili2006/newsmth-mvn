@@ -23,7 +23,8 @@ public class Mailer {
 
 	public boolean mail(String email) {
 
-		/* construct email content */
+		boolean sendok = false;
+		
 		DBUtil util = new DBUtil();
 		ArrayList<NoticeBean> list = null;
 		StringBuffer content = new StringBuffer();
@@ -52,13 +53,14 @@ public class Mailer {
 		Properties prop = helper.getProp();
 		String mailType = prop.getProperty("MAIL");
 		if ("javasendmail".equals(mailType)) {
-			return mailer.SendJavaMail(email, sTime, content.toString());
+			sendok = mailer.SendJavaMail(email, sTime, content.toString());
 		} else if ("linuxmail".equals(mailType)) {
 			try {
 				String cmd = "echo '" + content.toString() + "' | mail -s "
 						+ sTime + " " + email;
 				Process process = Runtime.getRuntime().exec(cmd);
 				log.error(cmd);
+				sendok = true;
 			} catch (IOException e) {
 				e.printStackTrace();
 				log.error("", e);
@@ -67,7 +69,7 @@ public class Mailer {
 		}
 
 		util.UpdateNotice(list);
-		return true;
+		return sendok;
 	}
 
 	/**

@@ -4,6 +4,8 @@
  */
 package com.newsmths.lucene;
 
+import com.newsmths.bean.ArticleBean;
+
 /**
  * @author Administrator
  *10:42:24 PM
@@ -15,6 +17,28 @@ public class SearchHit {
 	private String name;
 	private float score;
 	
+	private ArticleBean abean;
+	
+	public String getName() {
+		return name;
+	}
+
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+
+	public ArticleBean getAbean() {
+		return abean;
+	}
+
+
+	public void setAbean(ArticleBean abean) {
+		this.abean = abean;
+	}
+
+
 	/**
 	 * @return the content
 	 */

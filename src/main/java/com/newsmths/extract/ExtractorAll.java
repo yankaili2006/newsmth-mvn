@@ -71,6 +71,7 @@ public class ExtractorAll {
 
 			html = fetcher.getPage(url);
 			extractTopic(boardName, boardId, html, gid);
+			AccountUtil.TopicCnt++;
 
 		}
 
@@ -142,6 +143,8 @@ public class ExtractorAll {
 		bean.setId(id);
 		bean.setGid(gid);
 		bean.setUrl(url);
+		
+		log.debug("id: " + id);
 
 		// 2.0 内容
 		String content = "";
@@ -156,25 +159,33 @@ public class ExtractorAll {
 
 		// 1.0 标题和时间
 		String raw = "";
+		String author = "";
+		String board = "";
+		String title = "";
+		String time = "";
 		String headPattern = "发信人:(.*?), 信区:(.*?)\\\\n标  题:(.*?)\\\\n发信站: .*? \\((.*?)\\), (站内|转信)\\\\n(.*?)\\[m\\\\r\\[.*?m※ 来源:·";
 		pt = Pattern.compile(headPattern, Pattern.CASE_INSENSITIVE);
 		mt = pt.matcher(content);
 		while (mt.find()) {
-			String author = mt.group(1).trim();
-			String board = mt.group(2).trim();
-			String title = mt.group(3).trim();
-			String time = mt.group(4).trim();
+			author = mt.group(1).trim();
+			board= mt.group(2).trim();
+			title= mt.group(3).trim();
+			time = mt.group(4).trim();
 			raw = mt.group(6).trim();
-
-			bean.setAuthor(author);
-			bean.setTitle(title);
-
-			log.debug("author: " + author + ", " + board + "," + title + ","
-					+ time);
-			log.debug("raw: " + raw);
 		}
+		bean.setAuthor(author);
+		bean.setTitle(title);
+		bean.setTime(time);
+		bean.setRaw(raw);
+		
+		log.debug("author: " + author + ", " + board + "," + title + ","
+				+ time);
+		log.debug("raw: " + raw);
 
 		// 兼容编辑过的情况
+		String sign = "";
+		String channel = "";
+		String ip = "";
 		if (content.contains("--")) {
 
 			if (content.matches(".*?\\[.*?m※ 修改:.*?")) {
@@ -185,16 +196,9 @@ public class ExtractorAll {
 			pt = Pattern.compile(headPattern, Pattern.CASE_INSENSITIVE);
 			mt = pt.matcher(content);
 			while (mt.find()) {
-				String sign = mt.group(1).trim();
-				String channel = mt.group(2).trim();
-				String ip = mt.group(3).trim();
-
-				bean.setSign(sign);
-				bean.setChannel(channel);
-				bean.setIp(ip);
-				log.debug("sign: " + sign);
-				log.debug("channel: " + channel);
-				log.debug("ip: " + ip);
+				sign = mt.group(1).trim();
+				channel = mt.group(2).trim();
+				ip = mt.group(3).trim();
 			}
 		} else {
 			if (content.matches(".*?\\[.*?m※ 修改:.*?")) {
@@ -205,15 +209,16 @@ public class ExtractorAll {
 			pt = Pattern.compile(headPattern, Pattern.CASE_INSENSITIVE);
 			mt = pt.matcher(content);
 			while (mt.find()) {
-				String channel = mt.group(1).trim();
-				String ip = mt.group(2).trim();
-
-				bean.setChannel(channel);
-				bean.setIp(ip);
-				log.debug("channel: " + channel);
-				log.debug("ip: " + ip);
+				channel = mt.group(1).trim();
+				ip = mt.group(2).trim();
 			}
 		}
+		bean.setSign(sign);
+		bean.setChannel(channel);
+		bean.setIp(ip);
+		log.debug("sign: " + sign);
+		log.debug("channel: " + channel);
+		log.debug("ip: " + ip);
 
 		String safter = "";
 		String atauthor = "";

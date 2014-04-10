@@ -26,9 +26,11 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.SimpleFSDirectory;
 import org.apache.lucene.util.Version;
 
+import com.newsmths.bean.ArticleBean;
 import com.newsmths.bean.HitBean;
 import com.newsmths.extract.ExtractorAll;
 import com.newsmths.ide.task.TagTask;
+import com.newsmths.util.DBUtil;
 import com.newsmths.util.PropHelper;
 
 /**
@@ -123,6 +125,8 @@ public class Search {
 		if (topDocs != null) {
 			// 文档得分
 			ScoreDoc[] scoreDocs = topDocs.scoreDocs;
+
+			DBUtil util = new DBUtil();
 			for (int i = 0; i < topDocs.scoreDocs.length; i++) {
 				Document document = null;
 				try {
@@ -140,6 +144,7 @@ public class Search {
 				String name = document.getField(FIELD_NAME).stringValue();
 				float score = scoreDocs[i].score;
 
+				ArticleBean abean = util.getArticleById(Integer.valueOf(id));
 				// 输出文档名称以及得分值
 				log.info(name + " , " + score);
 
@@ -150,6 +155,7 @@ public class Search {
 				hit.setContent(content);
 				hit.setFileName(name);
 				hit.setScore(score);
+				hit.setAbean(abean);
 
 				hitBean.setHit(hit);
 				hits.add(hitBean);

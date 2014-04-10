@@ -135,35 +135,8 @@ html,body {
 			</form>
 		</div>
 		<%
-			//PageViewRender render = new PageViewRender();
-			//out.print(render.render(list));
-			if (list != null && list.size() > 0) {
-				out.print("<hr></hr>");
-
-				for (int i = 0; i < list.size(); i++) {
-					HitBean hitBean = list.get(i);
-					SearchHit hit = hitBean.getHit();
-					ArrayList<TagBean> tags = hitBean.getTags();
-					out.print("<h2>" + hit.getFileName() + "</h2><h4>相关度 :"
-							+ hit.getScore() + "</h4>");
-					out.print("<h4>");
-					// 打印标签
-					if (tags != null && tags.size() > 0) {
-						for (int j = 0; j < tags.size() && j < 10; j++) {
-							TagBean tag = tags.get(j);
-							out.print("<a href='SearchServlet?key="
-									+ tag.getWord() + "&p=" + p + "&a=" + a
-									+ "'>" + tag.getWord() + "</a>" + ":"
-									+ tag.getTfidf()
-									+ "&nbsp;&nbsp;&nbsp;&nbsp;");
-						}
-					}
-					out.print("</h4>");
-					out.print("<p>" + hit.getContent() + "</p>");
-				}
-			} else {
-				out.print("什么也没找到，换个关键词试试");
-			}
+			PageViewRender render = new PageViewRender();
+			out.print(render.render(list));
 		%>
 		<div class="pagination">
 			<ul>

@@ -2,6 +2,7 @@ package com.newsmths.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -33,7 +34,7 @@ public class DBUtil {
 	public boolean init() {
 		initDB();
 
-		initData();
+		// initData();
 
 		return true;
 	}
@@ -70,6 +71,7 @@ public class DBUtil {
 					+ "  title varchar(512) NOT NULL,"
 					+ "  author varchar(128) NOT NULL,"
 					+ "  sign blob NOT NULL," + "  content blob NOT NULL,"
+					+ "  raw blob NOT NULL,"
 					+ "  atauthor varchar(64) NOT NULL,"
 					+ "  atmsg blob NOT NULL," + "  msg blob NOT NULL,"
 					+ "  channel varchar(64) NOT NULL,"
@@ -90,6 +92,54 @@ public class DBUtil {
 			log.debug(sql);
 			stmt.addBatch(sql);
 
+			/* word */
+			sql = "DROP TABLE IF EXISTS word;";
+			log.debug(sql);
+			stmt.addBatch(sql);
+			sql = " CREATE TABLE IF NOT EXISTS word ("
+					+ " docId int(11) NOT NULL,"
+					+ " word varchar(256) NOT NULL," + " tfidf double NOT NULL"
+					+ ");";
+			log.debug(sql);
+			stmt.addBatch(sql);
+
+			/* doc */
+			sql = "DROP TABLE IF EXISTS doc;";
+			log.debug(sql);
+			stmt.addBatch(sql);
+			sql = " CREATE TABLE IF NOT EXISTS doc ("
+					+ " docId int(11) NOT NULL," + " tfidf double NOT NULL"
+					+ ");";
+			log.debug(sql);
+			stmt.addBatch(sql);
+
+			stmt.executeBatch();
+			if (stmt != null) {
+				stmt.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			log.error("", e);
+		} finally {
+			try {
+				if (conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+				log.error("", e);
+			}
+		}
+
+		return true;
+	}
+
+	public boolean initData() {
+
+		Statement stmt = null;
+		Connection conn = getConnectionByJDBC();
+		String sql = "";
+		try {
+			stmt = conn.createStatement();
 			/* board */
 			sql = "DROP TABLE IF EXISTS board;";
 			log.debug(sql);
@@ -150,55 +200,7 @@ public class DBUtil {
 					+ " uid int(11) NOT NULL," + " lid int(11) NOT NULL" + ");";
 			log.debug(sql);
 			stmt.addBatch(sql);
-
-			/* word */
-			sql = "DROP TABLE IF EXISTS word;";
-			log.debug(sql);
-			stmt.addBatch(sql);
-			sql = " CREATE TABLE IF NOT EXISTS word ("
-					+ " docId int(11) NOT NULL,"
-					+ " word varchar(256) NOT NULL," + " tfidf double NOT NULL"
-					+ ");";
-			log.debug(sql);
-			stmt.addBatch(sql);
-
-			/* doc */
-			sql = "DROP TABLE IF EXISTS doc;";
-			log.debug(sql);
-			stmt.addBatch(sql);
-			sql = " CREATE TABLE IF NOT EXISTS doc ("
-					+ " docId int(11) NOT NULL," + " tfidf double NOT NULL"
-					+ ");";
-			log.debug(sql);
-			stmt.addBatch(sql);
-
 			stmt.executeBatch();
-			if (stmt != null) {
-				stmt.close();
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			log.error("", e);
-		} finally {
-			try {
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-				log.error("", e);
-			}
-		}
-
-		return true;
-	}
-
-	public boolean initData() {
-
-		Statement stmt = null;
-		Connection conn = getConnectionByJDBC();
-		String sql = "";
-		try {
-			stmt = conn.createStatement();
 
 			/* board */
 			sql = "truncate table board;";
@@ -480,6 +482,7 @@ public class DBUtil {
 					+ bean.getTitle() + "', '" + bean.getAuthor() + "', '"
 					+ bean.getSign() + "', '"
 					+ encoder.encode(content.getBytes()) + "', '"
+					+ encoder.encode(bean.getRaw().getBytes()) + "', '"
 					+ bean.getAtauthor() + "', '"
 					+ encoder.encode(bean.getAtmsg().getBytes()) + "', '"
 					+ encoder.encode(bean.getMsg().getBytes()) + "', '"
@@ -809,38 +812,88 @@ public class DBUtil {
 	}
 
 	/* get article by article id */
-	public NoticeBean getArticleById(int aid) {
+	public ArticleBean getArticleById(int aid) {
 
 		Statement stmt = null;
 		Connection conn = getConnectionByJDBC();
 
-		NoticeBean bean = null;
+		ArticleBean bean = null;
 
 		try {
-			String sql = "select t.title as title, t.gid as gid, a.content as content from topic t, article a where t.gid = a.id and a.id = "
-					+ aid;
+			String sql = "select * from article where id = " + aid;
 			log.debug(sql);
 			stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
-				bean = new NoticeBean();
-				bean.setTitle(rs.getString("title"));
-				bean.setGid(rs.getInt("gid"));
-				String content = rs.getString("content");
-				BASE64Decoder decoder = new BASE64Decoder();
+				bean = new ArticleBean();
 
-				String buffer = null;
+				bean.setBoardName(rs.getString("boardName"));
+				bean.setBoardId(rs.getInt("boardId"));
+				bean.setId(rs.getInt("id"));
+				bean.setGid(rs.getInt("gid"));
+				bean.setUrl(rs.getString("url"));
+				bean.setTitle(rs.getString("title"));
+				bean.setAuthor(rs.getString("author"));
+
+				String a = Blob2Str(rs.getBlob("sign"));
+				bean.setSign(a);
+
+				a = Blob2Str(rs.getBlob("content"));
+				BASE64Decoder decoder = new BASE64Decoder();
 				try {
-					buffer = new String(decoder.decodeBuffer(content), "UTF-8");
+					String buffer = new String(decoder.decodeBuffer(a), "UTF-8");
+					buffer = buffer.replaceAll("\\\\n\\\\r", "<br>");
+					buffer = buffer.replaceAll("\\\\n", "<br>");
+					buffer = buffer.replaceAll("\\\\r", "<br>");
+					bean.setContent(buffer);
 				} catch (IOException e) {
 					e.printStackTrace();
 					log.error("", e);
 				}
 
-				buffer = buffer.replaceAll("\\\\n\\\\r", "<br>");
-				buffer = buffer.replaceAll("\\\\n", "<br>");
-				buffer = buffer.replaceAll("\\\\r", "<br>");
-				bean.setContent(buffer);
+				a = Blob2Str(rs.getBlob("raw"));
+				decoder = new BASE64Decoder();
+				try {
+					String buffer = new String(decoder.decodeBuffer(a), "UTF-8");
+					buffer = buffer.replaceAll("\\\\n\\\\r", "<br>");
+					buffer = buffer.replaceAll("\\\\n", "<br>");
+					buffer = buffer.replaceAll("\\\\r", "<br>");
+					bean.setRaw(buffer);
+				} catch (IOException e) {
+					e.printStackTrace();
+					log.error("", e);
+				}
+				a = Blob2Str(rs.getBlob("atmsg"));
+				decoder = new BASE64Decoder();
+				try {
+					String buffer = new String(decoder.decodeBuffer(a), "UTF-8");
+					buffer = buffer.replaceAll("\\\\n\\\\r", "<br>");
+					buffer = buffer.replaceAll("\\\\n", "<br>");
+					buffer = buffer.replaceAll("\\\\r", "<br>");
+					bean.setAtmsg(buffer);
+				} catch (IOException e) {
+					e.printStackTrace();
+					log.error("", e);
+				}
+
+				a = Blob2Str(rs.getBlob("msg"));
+				decoder = new BASE64Decoder();
+				try {
+					String buffer = new String(decoder.decodeBuffer(a), "UTF-8");
+					buffer = buffer.replaceAll("\\\\n\\\\r", "<br>");
+					buffer = buffer.replaceAll("\\\\n", "<br>");
+					buffer = buffer.replaceAll("\\\\r", "<br>");
+					bean.setMsg(buffer);
+				} catch (IOException e) {
+					e.printStackTrace();
+					log.error("", e);
+				}
+
+				bean.setAtauthor(rs.getString("atauthor"));
+
+				bean.setChannel(rs.getString("channel"));
+				bean.setTime(rs.getString("time"));
+				bean.setIp(rs.getString("ip"));
 			}
 			if (rs != null) {
 				rs.close();
@@ -877,7 +930,7 @@ public class DBUtil {
 		Connection conn = getConnectionByJDBC();
 
 		try {
-			String sql = "update notice set status = '1' where gid in("
+			String sql = "update notice set status = 1 where gid in("
 					+ gids.toString() + ")";
 
 			log.debug(sql);

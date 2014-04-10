@@ -35,6 +35,15 @@ public class ArticleBean {
 	private String time;
 	// 发表者的IP地址
 	private String ip;
+	// 纯正文
+	private String raw;
+	public String getRaw() {
+		return raw;
+	}
+
+	public void setRaw(String raw) {
+		this.raw = raw;
+	}
 
 	/**
 	 * @return the content
