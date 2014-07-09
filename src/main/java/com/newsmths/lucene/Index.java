@@ -27,6 +27,7 @@ import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.store.SimpleFSDirectory;
 import org.apache.lucene.util.Version;
 
+import com.newsmths.bean.ArticleIndexBean;
 import com.newsmths.bean.NoticeBean;
 import com.newsmths.bean.TopicBean;
 import com.newsmths.ide.task.IndexTask;
@@ -40,42 +41,32 @@ import com.newsmths.util.PropHelper;
  */
 public class Index {
 
-	// 索引三个字段：内容,文档全路径以及文件大小
-	private static String FIELD_CONTENT = "content";
-	private static String FIELD_NAME = "name";
-
 	private static Logger log = Logger.getLogger(Index.class);
 
 	/*
 	 * 从文件建立索引
 	 */
 	public void addDocFromFile(File file) {
-		// 获取内容
 		String content = FileReader.readText(file);
 		// 添加内容到索引
 		Document doc = new Document();
-		doc.add(new Field(FIELD_CONTENT, content, Field.Store.YES,
+		doc.add(new Field(IndexParam.FIELD_CONTENT, content, Field.Store.YES,
 				Field.Index.ANALYZED, Field.TermVector.WITH_POSITIONS_OFFSETS));
-		doc.add(new Field(FIELD_NAME, file.getAbsolutePath() + "\\"
+		doc.add(new Field(IndexParam.FIELD_NAME, file.getAbsolutePath() + "\\"
 				+ file.getName(), Field.Store.YES, Field.Index.ANALYZED,
 				Field.TermVector.WITH_POSITIONS_OFFSETS));
 
 		// 存取索引的目录
 		FSDirectory dir = null;
 		IndexReader reader = null;
-		IndexSearcher searcher = null;
+		IndexSearcher indexSearcher = null;
 		try {
-
-			PropHelper helper = new PropHelper();
-			Properties prop = helper.getProp();
+			Properties prop = new PropHelper().getProp();
 			dir = SimpleFSDirectory.open(new File(prop
 					.getProperty("index_path")));
 			reader = IndexReader.open(dir);
-			searcher = new IndexSearcher(reader);
-		} catch (CorruptIndexException e) {
-			e.printStackTrace();
-			log.error("", e);
-		} catch (IOException e) {
+			indexSearcher = new IndexSearcher(reader);
+		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("", e);
 		}
@@ -111,19 +102,12 @@ public class Index {
 	 * 对数据库表记录建立索引
 	 */
 	public void addDocFromDB() {
-		int perPage = 20;
-		int nPos = 1;
-
-		PropHelper helper = new PropHelper();
-		Properties prop = helper.getProp();
-		String path = prop.getProperty("index_path");
+		// 创建索引文件目录
+		String path = new PropHelper().getProp().getProperty("index_path");
 		try {
 			File dirFile = new File(path);
 			if (!(dirFile.exists()) && !(dirFile.isDirectory())) {
-				boolean creadok = dirFile.mkdirs();
-				if (creadok) {
-					log.info("创建目录成功，path = [" + path + "]");
-				} else {
+				if (!dirFile.mkdirs()) {
 					log.info("创建目录失败，path = [" + path + "]");
 				}
 			}
@@ -134,89 +118,70 @@ public class Index {
 
 		// 存取索引的目录
 		FSDirectory dir = null;
-		// IndexReader reader = null;
-		// IndexSearcher searcher = null;
 		try {
-
 			dir = SimpleFSDirectory.open(new File(path));
-			// reader = IndexReader.open(dir);
-			// searcher = new IndexSearcher(reader);
-		} catch (CorruptIndexException e) {
-			e.printStackTrace();
-			log.error("", e);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("", e);
 		}
 
-		ArrayList topics = null;
-		// 写索引到文件系统
+		// 写索引配置
 		IndexWriter writer = null;
 		try {
-			IndexWriterConfig confIndex = new IndexWriterConfig(
+			IndexWriterConfig indexCfg = new IndexWriterConfig(
 					Version.LUCENE_32, new PaodingAnalyzer());
-			confIndex.setOpenMode(OpenMode.CREATE_OR_APPEND);
+			indexCfg.setOpenMode(OpenMode.CREATE_OR_APPEND);
 			if (IndexWriter.isLocked(dir)) {
 				IndexWriter.unlock(dir);
 			}
-			writer = new IndexWriter(dir, confIndex);
-		} catch (CorruptIndexException e1) {
-			e1.printStackTrace();
-		} catch (LockObtainFailedException e1) {
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
+			writer = new IndexWriter(dir, indexCfg);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 		// 索引数据库中所有的topic
+		ArrayList topics = null;
 		do {
 			DBUtil util = new DBUtil();
-			topics = util.getTopicListPage(nPos, perPage);
+			topics = util.getTopNArticleListNotIndexed(100);
+
 			for (int i = 0; i < topics.size(); i++) {
-				NoticeBean bean = (NoticeBean) topics.get(i);
+				ArticleIndexBean bean = (ArticleIndexBean) topics.get(i);
 				// 添加内容到索引
 				Document doc = new Document();
-				doc.add(new Field(FIELD_CONTENT, bean.getContent(),
+				doc.add(new Field(IndexParam.FIELD_CONTENT, bean.getContent(),
 						Field.Store.YES, Field.Index.ANALYZED,
 						Field.TermVector.WITH_POSITIONS_OFFSETS));
-				doc.add(new Field(FIELD_NAME, bean.getTitle(), Field.Store.YES,
-						Field.Index.ANALYZED,
+				doc.add(new Field(IndexParam.FIELD_NAME, bean.getTitle(),
+						Field.Store.YES, Field.Index.ANALYZED,
 						Field.TermVector.WITH_POSITIONS_OFFSETS));
-				doc.add(new Field("id", String.valueOf(bean.getGid()),
+				doc.add(new Field(IndexParam.FIELD_ID, String.valueOf(bean
+						.getGid()), Field.Store.YES, Field.Index.NOT_ANALYZED,
+						Field.TermVector.YES));
+				doc.add(new Field(IndexParam.FIELD_TIME, bean.getTime(),
 						Field.Store.YES, Field.Index.NOT_ANALYZED,
 						Field.TermVector.YES));
+
 				try {
-					// writer.addDocument(doc);
 					// 使用update可以避免重复
 					writer.updateDocument(
-							new Term("id", String.valueOf(bean.getGid())), doc);
-				} catch (CorruptIndexException e) {
-					e.printStackTrace();
-					log.error("", e);
-				} catch (IOException e) {
+							new Term(IndexParam.FIELD_ID, String.valueOf(bean
+									.getGid())), doc);
+				} catch (Exception e) {
 					e.printStackTrace();
 					log.error("", e);
 				}
 			}
-			nPos += topics.size();
-
-		} while (topics.size() == 20);
+		} while (topics.size() >= 100);
 
 		try {
 			if (writer != null) {
 				writer.close();
 			}
-		} catch (CorruptIndexException e) {
-			e.printStackTrace();
-			log.error("", e);
-		} catch (LockObtainFailedException e) {
-			e.printStackTrace();
-			log.error("", e);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("", e);
 		}
-
 	}
 
 	/*

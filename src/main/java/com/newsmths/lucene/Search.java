@@ -19,6 +19,8 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TopScoreDocCollector;
@@ -40,9 +42,9 @@ import com.newsmths.util.PropHelper;
  * 
  */
 public class Search {
-	private static String FIELD_CONENT = "content";
-	private static String FIELD_NAME = "name";
+
 	private Integer total = 0;
+	private final Integer MAX_RECORD_NUM = 100;
 	private static Logger log = Logger.getLogger(Search.class);
 
 	public Integer getTotal() {
@@ -63,65 +65,38 @@ public class Search {
 
 	public ArrayList<HitBean> search(String searchKey, int nPage, int PAGE_SIZE) {
 
-		// 存放搜索结果
-		ArrayList<HitBean> hits = new ArrayList<HitBean>();
+		Query query = new TermQuery(new Term(IndexParam.FIELD_CONTENT,
+				searchKey));
+		log.info("Searching for: " + query.toString(IndexParam.FIELD_CONTENT));
 
-		// construct query
-		/*
-		 * QueryParser parser = new QueryParser(Version.LUCENE_32, FIELD_CONENT,
-		 * new PaodingAnalyzer()); Query query = null; try { query =
-		 * parser.parse(searchKey); } catch (ParseException e2) {
-		 * e2.printStackTrace(); }
-		 */
-		Query query = new TermQuery(new Term(FIELD_CONENT, searchKey));
-
-		// dir
-		FSDirectory dir = null;
+		/* 读取索引文件 */
 		IndexReader reader = null;
-		IndexSearcher searcher = null;
+		IndexSearcher indexSearcher = null;
 		try {
-			PropHelper helper = new PropHelper();
-			Properties prop = helper.getProp();
-			dir = SimpleFSDirectory.open(new File(prop
+			Properties prop = new PropHelper().getProp();
+			FSDirectory dir = SimpleFSDirectory.open(new File(prop
 					.getProperty("index_path")));
 			reader = IndexReader.open(dir);
-			searcher = new IndexSearcher(reader);
-		} catch (CorruptIndexException e) {
-			e.printStackTrace();
-			log.error("", e);
-		} catch (IOException e) {
+			indexSearcher = new IndexSearcher(reader);
+		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("", e);
 		}
 
-		log.info("Searching for: " + query.toString(FIELD_CONENT));
-
-		// 收集制定条数的数据
-		TopScoreDocCollector results = TopScoreDocCollector.create(nPage
-				* PAGE_SIZE, true);
-
-		// best top hits
+		// 搜索结果
+		Sort sort = new Sort(new SortField(IndexParam.FIELD_TIME,
+				SortField.Type.STRING, true)); // 排序,false升序,true降序
 		TopDocs topDocs = null;
-		if (searcher != null) {
+		if (indexSearcher != null) {
 			try {
-				searcher.search(query, results);
-				total = results.getTotalHits();
-				// 分页取
-				if (results.getTotalHits() >= nPage * PAGE_SIZE) {
-					topDocs = results.topDocs((nPage - 1) * PAGE_SIZE,
-							PAGE_SIZE);
-				} else if (results.getTotalHits() > 0) {
-					topDocs = results.topDocs((nPage - 1) * PAGE_SIZE,
-							results.getTotalHits() - (nPage - 1) * PAGE_SIZE);
-				} else {
-					topDocs = null;
-				}
-
-			} catch (IOException e1) {
-				e1.printStackTrace();
+				topDocs = indexSearcher.search(query, MAX_RECORD_NUM, sort);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 
+		// 存放搜索结果
+		ArrayList<HitBean> hits = new ArrayList<HitBean>();
 		if (topDocs != null) {
 			// 文档得分
 			ScoreDoc[] scoreDocs = topDocs.scoreDocs;
@@ -130,39 +105,29 @@ public class Search {
 			for (int i = 0; i < topDocs.scoreDocs.length; i++) {
 				Document document = null;
 				try {
-					document = searcher.doc(scoreDocs[i].doc);
-				} catch (CorruptIndexException e) {
-					e.printStackTrace();
-					log.error("", e);
-				} catch (IOException e) {
+					document = indexSearcher.doc(scoreDocs[i].doc);
+				} catch (Exception e) {
 					e.printStackTrace();
 					log.error("", e);
 				}
-				// 获取文档信息
-				String id = document.getField("id").stringValue();
-				String content = document.getField(FIELD_CONENT).stringValue();
-				String name = document.getField(FIELD_NAME).stringValue();
-				float score = scoreDocs[i].score;
 
+				// 组装结果
+				SearchHit hit = new SearchHit();
+				String id = document.getField("id").stringValue();
+				hit.setId(id);
 				ArticleBean abean = util.getArticleById(Integer.valueOf(id));
-				// 输出文档名称以及得分值
-				log.info(name + " , " + score);
+				hit.setAbean(abean);
+				hit.setContent(document.getField(IndexParam.FIELD_CONTENT)
+						.stringValue());
+				hit.setFileName(document.getField(IndexParam.FIELD_NAME)
+						.stringValue());
+				hit.setScore(scoreDocs[i].score);
 
 				HitBean hitBean = new HitBean();
-
-				SearchHit hit = new SearchHit();
-				hit.setId(id);
-				hit.setContent(content);
-				hit.setFileName(name);
-				hit.setScore(score);
-				hit.setAbean(abean);
-
 				hitBean.setHit(hit);
 				hits.add(hitBean);
 			}
 		}
-		// 结束时间
-		long endTime = System.currentTimeMillis();
 
 		// 关闭读入数据流
 		try {

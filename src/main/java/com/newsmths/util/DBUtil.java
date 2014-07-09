@@ -23,6 +23,7 @@ import com.newsmths.bean.LabelBean;
 import com.newsmths.bean.NoticeBean;
 import com.newsmths.bean.TagBean;
 import com.newsmths.bean.TopicBean;
+import com.newsmths.bean.ArticleIndexBean;
 import com.newsmths.bean.UserBean;
 import com.newsmths.bean.UserLabelBean;
 import com.newsmths.tfidf.DocTF;
@@ -487,7 +488,7 @@ public class DBUtil {
 					+ encoder.encode(bean.getAtmsg().getBytes()) + "', '"
 					+ encoder.encode(bean.getMsg().getBytes()) + "', '"
 					+ bean.getChannel() + "', '" + bean.getTime() + "', '"
-					+ bean.getIp() + "')";
+					+ bean.getIp() + "', 0)";
 			log.debug(sql);
 
 			stmt = conn.createStatement();
@@ -730,6 +731,63 @@ public class DBUtil {
 				buffer = buffer.replaceAll("\\\\n", "<br>");
 				buffer = buffer.replaceAll("\\\\r", "<br>");
 				bean.setContent(buffer);
+				list.add(bean);
+			}
+			if (rs != null) {
+				rs.close();
+			}
+			if (stmt != null) {
+				stmt.close();
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			log.error("", e);
+		} finally {
+			try {
+				if (conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+				log.error("", e);
+			}
+		}
+		return list;
+	}
+
+	/* get top n article list not indexed */
+	public ArrayList<ArticleIndexBean> getTopNArticleListNotIndexed(int cnt) {
+		ArrayList<ArticleIndexBean> list = new ArrayList<ArticleIndexBean>();
+
+		Statement stmt = null;
+		Connection conn = getConnectionByJDBC();
+
+		try {
+			String sql = "select t.title, t.gid, a.content, a.time from topic t, article a where t.gid = a.id and a.indexstatus = 0 limit "
+					+ 0 + "," + cnt;
+			log.debug(sql);
+			stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+			while (rs.next()) {
+				ArticleIndexBean bean = new ArticleIndexBean();
+				bean.setTitle(rs.getString("title"));
+				bean.setGid(rs.getInt("gid"));
+				bean.setTime(rs.getString("time"));
+
+				String content = rs.getString("content");
+				BASE64Decoder decoder = new BASE64Decoder();
+				String buffer = null;
+				try {
+					buffer = new String(decoder.decodeBuffer(content), "UTF-8");
+					buffer = buffer.replaceAll("\\\\n\\\\r", "<br>");
+					buffer = buffer.replaceAll("\\\\n", "<br>");
+					buffer = buffer.replaceAll("\\\\r", "<br>");
+					bean.setContent(buffer);
+				} catch (Exception e) {
+					e.printStackTrace();
+					log.error("", e);
+				}
+
 				list.add(bean);
 			}
 			if (rs != null) {

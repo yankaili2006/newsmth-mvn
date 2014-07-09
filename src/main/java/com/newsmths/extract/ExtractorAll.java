@@ -1,5 +1,9 @@
 package com.newsmths.extract;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,7 +22,7 @@ import com.newsmths.util.PropHelper;
 public class ExtractorAll {
 
 	public FetchURL fetcher = new FetchURL();
-	
+
 	private static Logger log = Logger.getLogger(ExtractorAll.class);
 
 	/*
@@ -91,10 +95,6 @@ public class ExtractorAll {
 		}
 	}
 
-	/**
-	 * @param html
-	 * @return ��ȡ�����б�
-	 */
 	public void extractTopic(String boardName, int boardId, String html, int gid) {
 		// o.o([[1639919,'solorist'],[1639922,'iwait'],[1639924,'sakulaqi'],[1639981,'sweanson'],[1640000,'imms'],[1640329,'MichaelChou']]);o.h();
 		// http://www.newsmth.net/bbscon.php?bid=675&id=1639922
@@ -143,7 +143,7 @@ public class ExtractorAll {
 		bean.setId(id);
 		bean.setGid(gid);
 		bean.setUrl(url);
-		
+
 		log.debug("id: " + id);
 
 		// 2.0 内容
@@ -168,18 +168,29 @@ public class ExtractorAll {
 		mt = pt.matcher(content);
 		while (mt.find()) {
 			author = mt.group(1).trim();
-			board= mt.group(2).trim();
-			title= mt.group(3).trim();
+			board = mt.group(2).trim();
+			title = mt.group(3).trim();
 			time = mt.group(4).trim();
 			raw = mt.group(6).trim();
 		}
 		bean.setAuthor(author);
 		bean.setTitle(title);
-		bean.setTime(time);
+		if (time != null) {
+			try {
+				SimpleDateFormat sdf = new SimpleDateFormat(
+						"EEE MMM dd HH:mm:ss yyyy", Locale.ENGLISH);
+				Date date = sdf.parse(time);
+				SimpleDateFormat format1 = new SimpleDateFormat(
+						"yyyy-MM-dd hh:mm:ss");
+				bean.setTime(format1.format(date));
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		bean.setRaw(raw);
-		
-		log.debug("author: " + author + ", " + board + "," + title + ","
-				+ time);
+
+		log.debug("author: " + author + ", " + board + "," + title + "," + time);
 		log.debug("raw: " + raw);
 
 		// 兼容编辑过的情况

@@ -53,8 +53,7 @@ public class InitServlet extends HttpServlet {
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
 		if (out != null) {
-			out
-					.println("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">");
+			out.println("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">");
 			out.println("<HTML>");
 			out.println("  <HEAD><TITLE>A Servlet</TITLE></HEAD>");
 			out.println("  <BODY>");
@@ -89,8 +88,7 @@ public class InitServlet extends HttpServlet {
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
 		if (out != null) {
-			out
-					.println("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">");
+			out.println("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">");
 			out.println("<HTML>");
 			out.println("  <HEAD><TITLE>A Servlet</TITLE></HEAD>");
 			out.println("  <BODY>");
@@ -115,19 +113,19 @@ public class InitServlet extends HttpServlet {
 		final long NO_DELAY = 0;
 		final long MILLIS_IN_HOUR = 3600 * 1000;
 		final long DELAY_TENMIN = 60 * 1000;
-		
+
 		Timer timerCrawler = new Timer("抓取", true);
 		timerCrawler.schedule(new CrawlTask(), NO_DELAY, MILLIS_IN_HOUR);
-		
-		Timer timerIndexer = new Timer("索引", true);
-		timerIndexer.schedule(new IndexTask(), NO_DELAY, MILLIS_IN_HOUR);
 
-		Timer timerTager = new Timer("标签", true);
-		timerTager.schedule(new TagTask(), NO_DELAY, MILLIS_IN_HOUR/6);
-		
-		Timer timerMailer = new Timer("发邮件", true);
-		timerMailer.schedule(new MailTask(), DELAY_TENMIN, MILLIS_IN_HOUR/6);
-		
+		Timer timerIndexer = new Timer("索引", true);
+		timerIndexer.schedule(new IndexTask(), DELAY_TENMIN, MILLIS_IN_HOUR);
+
+		// Timer timerTager = new Timer("标签", true);
+		// timerTager.schedule(new TagTask(), NO_DELAY, MILLIS_IN_HOUR/6);
+
+		// Timer timerMailer = new Timer("发邮件", true);
+		// timerMailer.schedule(new MailTask(), DELAY_TENMIN, MILLIS_IN_HOUR/6);
+
 	}
 
 }

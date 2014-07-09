@@ -1,4 +1,5 @@
 data/logs/
 data/bdb/
+data/index/
 target/
 src/main/resources/
