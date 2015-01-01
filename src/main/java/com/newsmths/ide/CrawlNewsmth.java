@@ -35,6 +35,7 @@ public class CrawlNewsmth {
 		log.info("start crawling.....");
 		
 		DBUtil util = new DBUtil();
+		/* 依次抓取board表中priority>0的版面 */
 		HashMap<Integer, String> boardMap = util.getBoardList();
 		Iterator iter = boardMap.entrySet().iterator();
 		while (iter.hasNext()) {
@@ -42,9 +43,12 @@ public class CrawlNewsmth {
 			String boardName = (String) entry.getValue();
 			int boardId = (Integer)entry.getKey();
 
+			/* 已抓取的最大页码 */
 			int pageNoFromDB = util.getMaxPageNoFromDB(boardId);
+			/* 待抓取的最大页码 */
 			int pageNoFromWeb = getMaxPageNoFromWeb(boardName);
 
+			/* 未抓取过的版面，只抓取当前最大页码 */
 			if (pageNoFromDB == 0) {
 				pageNoFromDB = pageNoFromWeb;
 			}

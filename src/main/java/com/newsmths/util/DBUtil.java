@@ -40,7 +40,7 @@ public class DBUtil {
 		return true;
 	}
 
-	/* create table and insert initialise data */
+	/* create tables */
 	public boolean initDB() {
 		Statement stmt = null;
 		Connection conn = getConnectionByJDBC();
@@ -134,6 +134,7 @@ public class DBUtil {
 		return true;
 	}
 
+	/* initialize tables */
 	public boolean initData() {
 
 		Statement stmt = null;
@@ -329,7 +330,7 @@ public class DBUtil {
 		Connection conn = getConnectionByJDBC();
 
 		try {
-			String sql = "select * from board where priority > 0";
+			String sql = "select * from board where priority > 0 order by priority desc";
 			log.debug(sql);
 
 			stmt = conn.createStatement();
@@ -755,7 +756,7 @@ public class DBUtil {
 		return list;
 	}
 
-	/* get top n article list not indexed */
+	/* 获取n个未索引的话题 */
 	public ArrayList<ArticleIndexBean> getTopNArticleListNotIndexed(int cnt) {
 		ArrayList<ArticleIndexBean> list = new ArrayList<ArticleIndexBean>();
 
@@ -810,6 +811,39 @@ public class DBUtil {
 			}
 		}
 		return list;
+	}
+
+
+	/* update notice status */
+	public boolean UpdateArticleNoticeStatus(Integer articlId) {
+	
+		Statement stmt = null;
+		Connection conn = getConnectionByJDBC();
+
+		try {
+			String sql = "update article set indexstatus = 1 where id =" + articlId+")";
+			log.debug(sql);
+
+			stmt = conn.createStatement();
+			stmt.executeUpdate(sql);
+
+			if (stmt != null) {
+				stmt.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			log.error("", e);
+		} finally {
+			try {
+				if (conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+				log.error("", e);
+			}
+		}
+
+		return true;
 	}
 
 	/* get article list */

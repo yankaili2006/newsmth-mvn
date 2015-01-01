@@ -26,7 +26,7 @@ public class ExtractorAll {
 	private static Logger log = Logger.getLogger(ExtractorAll.class);
 
 	/*
-	 * Crawl one page
+	 * 抓取单个页面，获取所有话题的id和标题
 	 */
 	public void extractTopicListByPage(String boardName, int boardId, int page) {
 
@@ -74,6 +74,7 @@ public class ExtractorAll {
 			util.addTopicBean(bean);
 
 			html = fetcher.getPage(url);
+			/* 抓取某一话题下的正文和所有回复 */
 			extractTopic(boardName, boardId, html, gid);
 			AccountUtil.TopicCnt++;
 
@@ -84,7 +85,7 @@ public class ExtractorAll {
 	}
 
 	/*
-	 * Crawl pages between pageStart and pageEnd
+	 * 抓取页码在[pageStart,pageEnd]之间的页面
 	 */
 	public void extractTopicListByPageRange(String boardName, int boardId,
 			int pageStart, int pageEnd) {
@@ -95,6 +96,7 @@ public class ExtractorAll {
 		}
 	}
 
+	/* 抓取某一话题下的正文和所有回复 */
 	public void extractTopic(String boardName, int boardId, String html, int gid) {
 		// o.o([[1639919,'solorist'],[1639922,'iwait'],[1639924,'sakulaqi'],[1639981,'sweanson'],[1640000,'imms'],[1640329,'MichaelChou']]);o.h();
 		// http://www.newsmth.net/bbscon.php?bid=675&id=1639922
@@ -132,7 +134,7 @@ public class ExtractorAll {
 
 	/**
 	 * @param html
-	 * @return 抽取话题列表
+	 * @return 抽取某一话题的正文和所有回复
 	 */
 	public void extractArticle(String url, String boardName, int boardId,
 			String html, int gid, int id) {
